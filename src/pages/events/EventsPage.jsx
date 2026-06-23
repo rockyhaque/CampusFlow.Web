@@ -6,17 +6,22 @@ import Pagination from '../../components/ui/Pagination.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { eventsService } from '../../services/events.service.js';
 import useAuthStore from '../../stores/useAuthStore.js';
-import Icon from '../../components/ui/Icon.jsx';
 import useToastStore from '../../stores/useToastStore.js';
+import Icon from '../../components/ui/Icon.jsx';
 import SelectMenu from '../../components/ui/SelectMenu.jsx';
+import { cfBanner } from '../../utils/cfDynamic.js';
+import EmptyState from '../../components/ui/EmptyState.jsx';
+import SearchInput from '../../components/ui/SearchInput.jsx';
+import { filterBar, pageActions, pageContent, pageHeader, pageSubtitle, pageTitle } from '../../components/layout/layoutClasses.js';
+import { btnPrimarySm, cardSm } from '../../components/ui/componentClasses.js';
+import {
+  eventCard, eventCardBadgeWrap, eventCardBanner, eventCardBody, eventCardCategory,
+  eventCardDetailRow, eventCardDetails, eventCardDetailText, eventCardMetaRow,
+  eventCardPriceBadge, eventCardTitle,
+} from './eventsPageClasses.js';
 
 const STATUSES = ['', 'published', 'ongoing', 'completed', 'cancelled', 'draft'];
 const CAN_CREATE = ['ORGANIZER', 'ADMIN'];
-
-function fmtDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -26,7 +31,6 @@ export default function EventsPage() {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const { user } = useAuthStore();
-  const toast = useToastStore();
   const navigate = useNavigate();
 
   const load = useCallback(() => {
@@ -52,55 +56,46 @@ export default function EventsPage() {
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="page-header">
+      <div className={pageContent}>
+        <div className={pageHeader}>
           <div>
-            <div className="page-title">Events</div>
-            <div className="page-subtitle">Browse and manage campus events{pagination.total != null ? ` · ${pagination.total} total` : ''}</div>
+            <div className={pageTitle}>Events</div>
+            <div className={pageSubtitle}>Browse and manage campus events{pagination.total != null ? ` · ${pagination.total} total` : ''}</div>
           </div>
           {canCreate && (
-            <div className="page-actions">
-              <button className="btn btn-primary btn-sm" onClick={() => navigate('/events/create')}>
+            <div className={pageActions}>
+              <button className={btnPrimarySm} onClick={() => navigate('/events/create')}>
                 + New Event
               </button>
             </div>
           )}
         </div>
 
-        <div className="filter-bar">
-          <div className="search-wrap events-filter-search">
-            <span className="search-icon">
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
-              </svg>
-            </span>
-            <input
-              className="search-input"
-              placeholder="Search events…"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            />
-          </div>
+        <div className={filterBar}>
+          <SearchInput
+            className="flex-1"
+            variant="compact"
+            iconSize={15}
+            placeholder="Search events…"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
           <SelectMenu
             value={status}
             onChange={(v) => { setStatus(v); setPage(1); }}
             placeholder="All statuses"
-            width={160}
             options={STATUSES.filter(Boolean).map((s) => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
           />
         </div>
 
         {loading ? <PageSpinner /> : events.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon" style={{ color: 'var(--text-muted)' }}>
-              <Icon name="calendar" size={40} strokeWidth={1.4} />
-            </div>
-            <div className="empty-state-title">No events found</div>
-            <div className="empty-state-desc">Try adjusting your filters or create a new event.</div>
-          </div>
+          <EmptyState
+            icon="calendar"
+            title="No events found"
+            description="Try adjusting your filters or create a new event."
+          />
         ) : (
-          <div className="events-grid">
+          <div className="mb-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
             {events.map((ev) => <EventCard key={ev.id} event={ev} onClick={() => navigate(`/events/${ev.id}`)} />)}
           </div>
         )}
@@ -117,42 +112,28 @@ export default function EventsPage() {
 
 function EventCard({ event: ev, onClick }) {
   return (
-    <div
-      className="card card-sm"
-      style={{ cursor: 'pointer', transition: 'border-color var(--transition-fast)', padding: 0, overflow: 'hidden' }}
-      onClick={onClick}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.35)')}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
-    >
+    <div className={`${cardSm} ${eventCard}`} onClick={onClick}>
       {/* Banner */}
-      <div style={{
-        height: 120,
-        background: ev.banner_url
-          ? `url(${ev.banner_url}) center/cover no-repeat`
-          : 'linear-gradient(135deg, var(--slate-800), var(--slate-900))',
-        position: 'relative',
-      }}>
-        <div style={{ position: 'absolute', top: 10, right: 10, backdropFilter: 'blur(6px)', borderRadius: 999 }}>
+      <div
+        className={`${eventCardBanner}${ev.banner_url ? ' cf-var-banner' : ''}`}
+        style={cfBanner(ev.banner_url)}
+      >
+        <div className={eventCardBadgeWrap}>
           <Badge label={ev.status} />
         </div>
       </div>
 
-      <div style={{ padding: '14px 16px 16px' }}>
-        <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3 }}>
-          {ev.title}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          {ev.category
-            ? <span style={{ fontSize: 12, color: 'var(--accent)' }}>{ev.category}</span>
-            : <span />
-          }
-          <span className={`badge ${ev.is_paid ? 'badge-amber' : 'badge-green'}`} style={{ fontSize: 11, padding: '2px 8px' }}>
+      <div className={eventCardBody}>
+        <div className={eventCardTitle}>{ev.title}</div>
+        <div className={eventCardMetaRow}>
+          {ev.category ? <span className={eventCardCategory}>{ev.category}</span> : <span />}
+          <span className={`${eventCardPriceBadge} ${ev.is_paid ? 'badge-amber' : 'badge-green'}`}>
             {ev.is_paid ? 'Paid' : 'Free'}
           </span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className={eventCardDetails}>
           {ev.start_date && (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 6, alignItems: 'center' }}>
+            <div className={eventCardDetailRow}>
               <Icon name="calendar" size={13} />
               <span>{new Date(ev.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             </div>
@@ -161,11 +142,9 @@ function EventCard({ event: ev, onClick }) {
             const v = ev.venue || ev.location;
             const online = /^https?:\/\//i.test(v);
             return (
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 6, alignItems: 'center' }}>
+              <div className={eventCardDetailRow}>
                 <Icon name={online ? 'spark' : 'mapPin'} size={13} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {online ? 'Online' : v}
-                </span>
+                <span className={eventCardDetailText}>{online ? 'Online' : v}</span>
               </div>
             );
           })()}

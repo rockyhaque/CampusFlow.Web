@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { notificationsService } from '../services/notifications.service.js';
 
-const useNotifStore = create((set, get) => ({
+const useNotifStore = create((set) => ({
   notifications: [],
   unreadCount: 0,
   isLoading: false,

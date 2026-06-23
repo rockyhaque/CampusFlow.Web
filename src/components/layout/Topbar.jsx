@@ -6,6 +6,15 @@ import useNotifStore from '../../stores/useNotifStore.js';
 import useToastStore from '../../stores/useToastStore.js';
 import Icon from '../ui/Icon.jsx';
 import Avatar from '../ui/Avatar.jsx';
+import { btnGhostSm } from '../ui/componentClasses.js';
+import {
+  topbar, topbarLeft, topbarIconBtn, topbarNavToggle, topbarRight, topbarNotifDot,
+  topbarUser, topbarUserMeta, topbarUserName, topbarUserRole, topbarUserMenu,
+  topbarMenuItem, topbarMenuItemDanger, notifPopover, notifHeader, notifTitle,
+  notifSubtitle, notifBody, notifLoading, notifEmpty, notifEmptyTitle, notifEmptySub,
+  notifItem, notifItemContent, notifItemHeadline, notifItemMessage, notifItemTime,
+  notifDelete,
+} from './topbarClasses.js';
 
 function timeAgo(date) {
   if (!date) return '';
@@ -89,11 +98,11 @@ export default function Topbar() {
   };
 
   return (
-    <header className="topbar">
-      <div className="topbar-left">
+    <header className={topbar}>
+      <div className={topbarLeft}>
         <button
           type="button"
-          className="topbar-icon-btn topbar-nav-toggle"
+          className={`${topbarIconBtn} ${topbarNavToggle}`}
           onClick={toggleDrawer}
           aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
           aria-expanded={drawerOpen}
@@ -101,80 +110,78 @@ export default function Topbar() {
           <Icon name="menu" size={18} />
         </button>
       </div>
-      <div className="topbar-right">
+      <div className={topbarRight}>
         <button
           ref={buttonRef}
-          className="topbar-icon-btn"
+          className={topbarIconBtn}
           onClick={() => setOpen((v) => !v)}
           title="Notifications"
           aria-expanded={open}
         >
           <Icon name="bell" size={18} />
-          {unreadCount > 0 && <span className="topbar-notif-dot" />}
+          {unreadCount > 0 && <span className={topbarNotifDot} />}
         </button>
 
         {open && (
-          <div
-            ref={popoverRef}
-            className="notif-popover"
-          >
-            {/* Header */}
-            <div className="notif-header">
+          <div ref={popoverRef} className={notifPopover}>
+            <div className={notifHeader}>
               <div>
-                <div className="notif-title">Notifications</div>
-                <div className="notif-subtitle">
+                <div className={notifTitle}>Notifications</div>
+                <div className={notifSubtitle}>
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
                 </div>
               </div>
               {unreadCount > 0 && (
-                <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>
+                <button className={btnGhostSm} onClick={handleMarkAllRead}>
                   Mark all read
                 </button>
               )}
             </div>
 
-            {/* Body */}
-            <div className="notif-body">
+            <div className={notifBody}>
               {isLoading && notifications.length === 0 ? (
-                <div className="notif-loading">Loading…</div>
+                <div className={notifLoading}>Loading…</div>
               ) : notifications.length === 0 ? (
-                <div className="notif-empty">
+                <div className={notifEmpty}>
                   <Icon name="bell" size={32} strokeWidth={1.4} />
-                  <div className="notif-empty-title">No notifications</div>
-                  <div className="notif-empty-sub">You're all caught up.</div>
+                  <div className={notifEmptyTitle}>No notifications</div>
+                  <div className={notifEmptySub}>You're all caught up.</div>
                 </div>
               ) : (
                 <div>
-                  {notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`notif-item ${n.is_read ? 'read' : 'unread'}`}
-                      onClick={() => !n.is_read && markRead(n.id)}
-                    >
-                      <div className="notif-item-content">
-                        <div className="notif-item-headline">
-                          {n.title || n.message}
-                        </div>
-                        {n.title && n.message && (
-                          <div className="notif-item-message">
-                            {n.message}
-                          </div>
-                        )}
-                        <div className="notif-item-time">
-                          {timeAgo(n.created_at)}
-                        </div>
-                      </div>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }}
-                        title="Delete"
+                  {notifications.map((n) => {
+                    const unread = !n.is_read;
+                    return (
+                      <div
+                        key={n.id}
+                        className={notifItem(unread)}
+                        onClick={() => unread && markRead(n.id)}
                       >
-                        <span className="notif-delete">
-                          <Icon name="x" size={14} />
-                        </span>
-                      </button>
-                    </div>
-                  ))}
+                        <div className={notifItemContent}>
+                          <div className={notifItemHeadline(unread)}>
+                            {n.title || n.message}
+                          </div>
+                          {n.title && n.message && (
+                            <div className={notifItemMessage}>
+                              {n.message}
+                            </div>
+                          )}
+                          <div className={notifItemTime}>
+                            {timeAgo(n.created_at)}
+                          </div>
+                        </div>
+                        <button
+                          className={btnGhostSm}
+                          onClick={(e) => { e.stopPropagation(); handleRemove(n.id); }}
+                          title="Delete"
+                        >
+                          <span className={notifDelete}>
+                            <Icon name="x" size={14} />
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -184,29 +191,25 @@ export default function Topbar() {
         <button
           ref={userButtonRef}
           type="button"
-          className="topbar-user"
+          className={topbarUser}
           onClick={() => setUserOpen((v) => !v)}
           aria-expanded={userOpen}
           aria-haspopup="menu"
         >
           <Avatar name={fullName} size="sm" />
-          <div className="topbar-user-meta">
-            <div className="topbar-user-name">{fullName}</div>
-            <div className="topbar-user-role">{role}</div>
+          <div className={topbarUserMeta}>
+            <div className={topbarUserName}>{fullName}</div>
+            <div className={topbarUserRole}>{role}</div>
           </div>
         </button>
 
         {userOpen && (
-          <div
-            ref={userPopoverRef}
-            className="topbar-user-menu"
-            role="menu"
-          >
-            <button type="button" className="topbar-menu-item" role="menuitem" onClick={handleGoProfile}>
+          <div ref={userPopoverRef} className={topbarUserMenu} role="menu">
+            <button type="button" className={topbarMenuItem} role="menuitem" onClick={handleGoProfile}>
               <Icon name="user" size={16} />
               <span>My Profile</span>
             </button>
-            <button type="button" className="topbar-menu-item danger" role="menuitem" onClick={handleLogout}>
+            <button type="button" className={topbarMenuItemDanger} role="menuitem" onClick={handleLogout}>
               <Icon name="logout" size={16} />
               <span>Logout</span>
             </button>

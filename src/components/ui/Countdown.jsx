@@ -10,30 +10,54 @@ import Icon from './Icon.jsx';
  *   "deadline" — counts down to a deadline (red, strong urgency)
  */
 
-const VARIANTS = {
+const VARIANT = {
   starts: {
-    bg: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.04))',
-    border: 'rgba(139,92,246,0.30)',
-    fg: 'rgba(139,92,246,1)',
-    fgDim: 'rgba(139,92,246,0.60)',
-    glow: '0 0 20px rgba(139,92,246,0.18)',
+    wrap: 'border-violet-500/30 bg-gradient-to-br from-violet-500/10 to-violet-500/[0.04] shadow-[0_0_20px_rgba(139,92,246,0.18)]',
+    fg: 'text-violet-500',
+    fgDim: 'text-violet-500/60',
+    iconColor: 'rgba(139,92,246,1)',
     icon: 'clock',
   },
   ends: {
-    bg: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(245,158,11,0.04))',
-    border: 'rgba(245,158,11,0.45)',
-    fg: 'var(--amber-400)',
-    fgDim: 'rgba(245,158,11,0.65)',
-    glow: '0 0 20px rgba(245,158,11,0.25)',
+    wrap: 'border-amber-500/45 bg-gradient-to-br from-amber-500/10 to-amber-500/[0.04] shadow-[0_0_20px_rgba(245,158,11,0.25)]',
+    fg: 'text-amber-400',
+    fgDim: 'text-amber-500/65',
+    iconColor: 'var(--amber-400)',
     icon: 'clock',
   },
   deadline: {
-    bg: 'linear-gradient(135deg, rgba(239,68,68,0.10), rgba(239,68,68,0.04))',
-    border: 'rgba(239,68,68,0.45)',
-    fg: 'var(--red-400)',
-    fgDim: 'rgba(239,68,68,0.65)',
-    glow: '0 0 20px rgba(239,68,68,0.25)',
+    wrap: 'border-red-500/45 bg-gradient-to-br from-red-500/10 to-red-500/[0.04] shadow-[0_0_20px_rgba(239,68,68,0.25)]',
+    fg: 'text-red-400',
+    fgDim: 'text-red-500/65',
+    iconColor: 'var(--red-400)',
     icon: 'warning',
+  },
+};
+
+const SIZE = {
+  sm: {
+    wrap: 'gap-1.5 px-3 py-2',
+    num: 'text-lg',
+    unit: 'text-[9px] mt-1',
+    minW: 'min-w-[26px]',
+    sep: 'mx-1.5 pb-4 text-sm',
+    label: 'text-[10px]',
+  },
+  md: {
+    wrap: 'gap-1.5 px-4 py-2.5',
+    num: 'text-[26px]',
+    unit: 'text-[10px] mt-1',
+    minW: 'min-w-[34px]',
+    sep: 'mx-2.5 pb-5 text-xl',
+    label: 'text-[10px]',
+  },
+  lg: {
+    wrap: 'gap-1.5 px-[22px] py-3.5',
+    num: 'text-4xl',
+    unit: 'text-[11px] mt-1',
+    minW: 'min-w-[44px]',
+    sep: 'mx-3 pb-6 text-[25px]',
+    label: 'text-[10px]',
   },
 };
 
@@ -57,141 +81,76 @@ export default function Countdown({
   variant = 'starts',
   label,
   expiredLabel,
-  size = 'md', // 'sm' | 'md' | 'lg'
+  size = 'md',
 }) {
   const [now, setNow] = useState(() => compute(target));
   const tickRef = useRef(null);
 
   useEffect(() => {
     if (!target) return;
-    setNow(compute(target));
-    // Always tick every second — battery cost is negligible compared to user
-    // expectation that this is a real, live counter.
+    const rafId = requestAnimationFrame(() => setNow(compute(target)));
     tickRef.current = setInterval(() => {
       const next = compute(target);
       setNow(next);
       if (next?.expired) clearInterval(tickRef.current);
     }, 1000);
-    return () => clearInterval(tickRef.current);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearInterval(tickRef.current);
+    };
   }, [target]);
 
   if (!target || !now) return null;
 
-  const v = VARIANTS[variant] || VARIANTS.starts;
+  const v = VARIANT[variant] || VARIANT.starts;
+  const s = SIZE[size] || SIZE.md;
 
   if (now.expired) {
     return expiredLabel ? (
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        padding: '8px 14px',
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-md)',
-        fontSize: 13, color: 'var(--text-muted)',
-      }}>
+      <div className="inline-flex items-center gap-2 rounded-md border border-border-subtle bg-surface px-3.5 py-2 text-[13px] text-muted">
         <Icon name={v.icon} size={14} />
         {expiredLabel}
       </div>
     ) : null;
   }
 
-  const sizes = {
-    sm: { num: 18, unit: 9,  pad: '8px 12px', gap: 6,  sep: 14 },
-    md: { num: 26, unit: 10, pad: '10px 16px', gap: 10, sep: 20 },
-    lg: { num: 36, unit: 11, pad: '14px 22px', gap: 14, sep: 24 },
-  };
-  const s = sizes[size] || sizes.md;
-
-  // Hide leading days when zero (cleaner display for short countdowns)
   const showDays = now.days > 0;
   const cells = [];
   if (showDays) cells.push({ value: pad2(now.days), unit: now.days === 1 ? 'DAY' : 'DAYS' });
-  cells.push({ value: pad2(now.hours),   unit: 'HRS' });
+  cells.push({ value: pad2(now.hours), unit: 'HRS' });
   cells.push({ value: pad2(now.minutes), unit: 'MIN' });
   cells.push({ value: pad2(now.seconds), unit: 'SEC', live: true });
 
   return (
-    <div style={{
-      display: 'inline-flex',
-      flexDirection: 'column',
-      gap: 6,
-      padding: s.pad,
-      background: v.bg,
-      border: `1px solid ${v.border}`,
-      borderRadius: 'var(--radius-md)',
-      boxShadow: v.glow,
-    }}>
+    <div className={`inline-flex flex-col rounded-md border ${v.wrap} ${s.wrap}`}>
       {label && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          fontWeight: 600,
-        }}>
-          <Icon name={v.icon} size={12} color={v.fg} />
+        <div className={`flex items-center gap-1.5 font-semibold uppercase tracking-widest text-muted ${s.label}`}>
+          <Icon name={v.icon} size={12} color={v.iconColor} />
           {label}
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0 }}>
+      <div className="flex items-end">
         {cells.map((c, i) => (
-          <div key={c.unit} style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: s.num + 8 }}>
+          <div key={c.unit} className="flex items-end">
+            <div className={`flex flex-col items-center ${s.minW}`}>
               <div
-                key={c.live ? c.value : undefined /* re-mount on each tick to retrigger animation */}
-                style={{
-                  fontSize: s.num,
-                  fontWeight: 700,
-                  fontFamily: 'monospace',
-                  color: v.fg,
-                  letterSpacing: '0.02em',
-                  lineHeight: 1,
-                  fontVariantNumeric: 'tabular-nums',
-                  animation: c.live ? 'cf-tick 1s linear' : undefined,
-                }}
+                key={c.live ? c.value : undefined}
+                className={`font-mono font-bold tabular-nums leading-none tracking-wide ${v.fg} ${s.num} ${c.live ? 'animate-cf-tick' : ''}`}
               >
                 {c.value}
               </div>
-              <div style={{
-                fontSize: s.unit,
-                color: v.fgDim,
-                letterSpacing: '0.1em',
-                marginTop: 4,
-                fontWeight: 600,
-              }}>
+              <div className={`font-semibold uppercase tracking-widest ${v.fgDim} ${s.unit}`}>
                 {c.unit}
               </div>
             </div>
             {i < cells.length - 1 && (
-              <div style={{
-                fontSize: s.num * 0.7,
-                color: v.fgDim,
-                fontWeight: 700,
-                margin: `0 ${s.sep / 2}px`,
-                opacity: 0.5,
-                lineHeight: 1,
-                paddingBottom: s.unit + 8,
-                animation: 'cf-blink 1s linear infinite',
-              }}>
+              <div className={`font-bold leading-none opacity-50 animate-cf-blink ${v.fgDim} ${s.sep}`}>
                 :
               </div>
             )}
           </div>
         ))}
       </div>
-      {/* Inline keyframes (kept here so the component is self-contained) */}
-      <style>{`
-        @keyframes cf-tick {
-          0%   { transform: translateY(-2px); opacity: 0.5; }
-          15%  { transform: translateY(0); opacity: 1; }
-          100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes cf-blink {
-          0%, 49%   { opacity: 0.5; }
-          50%, 100% { opacity: 0.15; }
-        }
-      `}</style>
     </div>
   );
 }

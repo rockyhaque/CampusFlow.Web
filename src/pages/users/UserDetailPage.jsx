@@ -11,14 +11,44 @@ import { usersService } from '../../services/users.service.js';
 import { feedbackService } from '../../services/feedback.service.js';
 import useAuthStore from '../../stores/useAuthStore.js';
 import useToastStore from '../../stores/useToastStore.js';
+import { contentGrid, pageContent, pageHeader, pageSubtitle, pageTitle } from '../../components/layout/layoutClasses.js';
+import {
+  adminPanel,
+  adminPanelActions,
+  adminPanelDesc,
+  adminPanelHeader,
+  adminPanelTitle,
+  badgeBase,
+  badgeColor,
+  btnSecondarySm,
+  btnSuccessSm,
+  card,
+  cardProfileBadges,
+  cardProfileEmail,
+  cardProfileHeader,
+  cardProfileMeta,
+  cardProfileName,
+  cardSection,
+  cardSectionChips,
+  cardSectionLabel,
+  cardSectionLabelSpaced,
+  cardSectionText,
+  cardTitleMb,
+  infoRow,
+  infoRowLabel,
+  infoRowValue,
+  inputSelectFlex,
+  pageToolbar,
+  selfRoleNote,
+} from '../../components/ui/componentClasses.js';
 
 const ROLES = ['ATTENDEE', 'VOLUNTEER', 'ORGANIZER', 'ADMIN'];
 
 function InfoRow({ label, value }) {
   return (
-    <div style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-      <span style={{ width: 140, flexShrink: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{label}</span>
-      <span style={{ fontSize: 14, color: 'var(--text-default)' }}>{value || '—'}</span>
+    <div className={infoRow}>
+      <span className={infoRowLabel}>{label}</span>
+      <span className={infoRowValue}>{value || '—'}</span>
     </div>
   );
 }
@@ -102,7 +132,7 @@ export default function UserDetailPage() {
   if (loading) return (
     <>
       <Topbar />
-      <div className="page-content"><PageSpinner /></div>
+      <div className={pageContent}><PageSpinner /></div>
     </>
   );
 
@@ -113,33 +143,34 @@ export default function UserDetailPage() {
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="page-header">
+      <div className={pageContent}>
+        <div className={pageHeader}>
           <div>
-            <div className="page-title">{name}</div>
-            <div className="page-subtitle">User details and account info</div>
+            <div className={pageTitle}>{name}</div>
+            <div className={pageSubtitle}>User details and account info</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/users')}>← Back</button>
+        <div className={pageToolbar}>
+          <button type="button" className={btnSecondarySm} onClick={() => navigate('/users')}>← Back</button>
           {user.role === 'ORGANIZER' && !user.is_approved && (
-            <button className="btn btn-success btn-sm" onClick={handleApprove}>Approve Organizer</button>
+            <button type="button" className={btnSuccessSm} onClick={handleApprove}>Approve Organizer</button>
           )}
           <button
+            type="button"
             className={`btn btn-sm ${user.is_active ? 'btn-danger' : 'btn-success'}`}
             onClick={handleToggleActive}
           >{user.is_active ? 'Deactivate' : 'Activate'}</button>
         </div>
 
-        <div className="content-grid">
+        <div className={contentGrid}>
           {/* Profile Card */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+          <div className={card}>
+            <div className={cardProfileHeader}>
               <Avatar name={name} src={user.photo_url} size="xl" />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--text-primary)' }}>{name}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 3 }}>{user.email}</div>
-                <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div className={cardProfileMeta}>
+                <div className={cardProfileName}>{name}</div>
+                <div className={cardProfileEmail}>{user.email}</div>
+                <div className={cardProfileBadges}>
                   <Badge label={user.role} />
                   <Badge label={user.is_active ? 'active' : 'inactive'} />
                   {ratings && ratings.count > 0 && (
@@ -156,8 +187,8 @@ export default function UserDetailPage() {
           </div>
 
           {/* Account Card */}
-          <div className="card">
-            <div className="card-title" style={{ marginBottom: 16 }}>Account Info</div>
+          <div className={card}>
+            <div className={cardTitleMb}>Account Info</div>
             <InfoRow label="Role" value={<Badge label={user.role} />} />
             <InfoRow label="Email verified" value={<Badge label={user.is_email_verified ? 'Verified' : 'Unverified'} color={user.is_email_verified ? 'green' : 'amber'} />} />
             <InfoRow label="Approved" value={<Badge label={user.is_approved ? 'Approved' : 'Pending'} color={user.is_approved ? 'green' : 'amber'} />} />
@@ -166,30 +197,23 @@ export default function UserDetailPage() {
 
             {/* Admin: change role */}
             {isAdmin && !isSelf && (
-              <div style={{
-                marginTop: 18,
-                padding: 14,
-                background: 'rgba(168,85,247,0.06)',
-                border: '1px solid rgba(168,85,247,0.25)',
-                borderRadius: 'var(--radius-md)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div className={adminPanel}>
+                <div className={adminPanelHeader}>
                   <Icon name="shield" size={16} color="var(--purple-400)" />
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--purple-400)' }}>Change Role</div>
+                  <div className={adminPanelTitle}>Change Role</div>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+                <div className={adminPanelDesc}>
                   Promote or demote this user. Promoting to Organizer auto-approves; promoting to Admin also marks email verified.
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className={adminPanelActions}>
                   <select
-                    className="input-field select-field"
+                    className={inputSelectFlex}
                     value={user.role}
                     onChange={(e) => {
                       const next = e.target.value;
                       if (next === user.role) return;
                       setPendingRole(next);
                     }}
-                    style={{ flex: 1, minWidth: 200 }}
                   >
                     {ROLES.map((r) => (
                       <option key={r} value={r}>{r.replace('_', ' ')}</option>
@@ -199,22 +223,22 @@ export default function UserDetailPage() {
               </div>
             )}
             {isSelf && isAdmin && (
-              <div style={{ marginTop: 14, fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              <div className={selfRoleNote}>
                 You can't change your own role.
               </div>
             )}
             {user.bio && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>Bio</div>
-                <p style={{ fontSize: 14, color: 'var(--text-default)', lineHeight: 1.6 }}>{user.bio}</p>
+              <div className={cardSection}>
+                <div className={cardSectionLabel}>Bio</div>
+                <p className={cardSectionText}>{user.bio}</p>
               </div>
             )}
             {user.skills?.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>Skills</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div className={cardSection}>
+                <div className={cardSectionLabelSpaced}>Skills</div>
+                <div className={cardSectionChips}>
                   {user.skills.map((s) => (
-                    <span key={s} className="badge badge-cyan">{s}</span>
+                    <span key={s} className={`${badgeBase} ${badgeColor('cyan')}`}>{s}</span>
                   ))}
                 </div>
               </div>

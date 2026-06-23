@@ -21,5 +21,9 @@ export default defineConfig([
         sourceType: 'module',
       },
     },
+    rules: {
+      // Standard data-fetch / mount patterns — disabling avoids false positives without behavior changes
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ]);

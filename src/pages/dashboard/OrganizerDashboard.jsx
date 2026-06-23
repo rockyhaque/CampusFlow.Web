@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
 import Topbar from '../../components/layout/Topbar.jsx';
 import StatCard from '../../components/ui/StatCard.jsx';
 import Badge from '../../components/ui/Badge.jsx';
@@ -7,6 +6,16 @@ import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { dashboardService } from '../../services/dashboard.service.js';
 import Icon from '../../components/ui/Icon.jsx';
 import { ChartCard, AreaTrend, BarSeries, PieBreakdown, CHART_COLORS } from '../../components/ui/Charts.jsx';
+import { chartsGrid, chartsGridWide, pageContent, pageHeader, pageSubtitle, pageTitle, statsGrid } from '../../components/layout/layoutClasses.js';
+import { card, tableWrap, cellMuted, tdPrimary } from '../../components/ui/componentClasses.js';
+import {
+  cardMt,
+  cardSectionTitle,
+  dashStagger,
+  dashboardError,
+  dashboardErrorRetry,
+  dashboardLoaded,
+} from './dashboardClasses.js';
 
 const fmtMonth = (d) => new Date(d).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
 const truncate = (s, n = 14) => (s && s.length > n ? s.slice(0, n - 1) + '…' : s);
@@ -15,17 +24,44 @@ export default function OrganizerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
+  const loadDashboard = useCallback(() => {
+    setLoading(true);
+    setError(null);
     dashboardService.organizerDashboard()
       .then((r) => setData(r.data))
       .catch((e) => setError(e.response?.data?.message || 'Failed to load dashboard'))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return (<><Topbar /><div className="page-content"><PageSpinner /></div></>);
-  if (error) return (<><Topbar /><div className="page-content"><div className="auth-error"><Icon name="warning" size={16} /> {error}</div></div></>);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  if (loading) {
+    return (
+      <>
+        <Topbar />
+        <div className={pageContent}><PageSpinner /></div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Topbar />
+        <div className={pageContent}>
+          <div className={dashboardError} role="alert">
+            <Icon name="warning" size={16} />
+            <span>{error}</span>
+            <button type="button" className={dashboardErrorRetry} onClick={loadDashboard}>Retry</button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (!data) return null;
 
   const e = data.events || {};
@@ -34,9 +70,9 @@ export default function OrganizerDashboard() {
 
   const eventsPie = [
     { name: 'Published', value: parseInt(e.published) || 0 },
-    { name: 'Ongoing',   value: parseInt(e.ongoing) || 0 },
+    { name: 'Ongoing', value: parseInt(e.ongoing) || 0 },
     { name: 'Completed', value: parseInt(e.completed) || 0 },
-    { name: 'Draft',     value: parseInt(e.draft) || 0 },
+    { name: 'Draft', value: parseInt(e.draft) || 0 },
   ].filter((s) => s.value > 0);
 
   const monthlyRevenue = (data.monthlyRevenue || []).map((m) => ({
@@ -57,64 +93,38 @@ export default function OrganizerDashboard() {
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="page-header">
+      <div className={`${pageContent} ${dashboardLoaded}`}>
+        <header className={pageHeader}>
           <div>
-            <div className="page-title">Dashboard</div>
-            <div className="page-subtitle">Your event analytics</div>
+            <h1 className={pageTitle}>Dashboard</h1>
+            <p className={pageSubtitle}>Your event analytics</p>
           </div>
+        </header>
+
+        <div className={statsGrid}>
+          <StatCard icon={<Icon name="calendar" size={22} />} label="Total Events" value={e.total} color="cyan" className="dashboard-enter" style={dashStagger(0).style} />
+          <StatCard icon={<Icon name="checkCircle" size={22} />} label="Active" value={(parseInt(e.published) || 0) + (parseInt(e.ongoing) || 0)} color="green" className="dashboard-enter" style={dashStagger(1).style} />
+          <StatCard icon={<Icon name="ticket" size={22} />} label="Tickets Sold" value={tt.total} color="amber" className="dashboard-enter" style={dashStagger(2).style} />
+          <StatCard icon={<Icon name="trophy" size={22} />} label="Revenue" value={`${(tt.revenue || 0).toFixed(0)} ৳`} color="purple" className="dashboard-enter" style={dashStagger(3).style} />
+          <StatCard icon={<Icon name="users" size={22} />} label="Volunteers" value={apps.approved} sub={`${apps.pending || 0} pending`} color="green" className="dashboard-enter" style={dashStagger(4).style} />
         </div>
 
-        {/* Top stats */}
-        <div className="stats-grid">
-          <StatCard icon={<Icon name="calendar" size={22} />} label="Total Events" value={e.total} color="cyan" />
-          <StatCard icon={<Icon name="checkCircle" size={22} />} label="Active" value={(parseInt(e.published) || 0) + (parseInt(e.ongoing) || 0)} color="green" />
-          <StatCard icon={<Icon name="ticket" size={22} />} label="Tickets Sold" value={tt.total} color="amber" />
-          <StatCard icon={<Icon name="trophy" size={22} />} label="Revenue" value={`${(tt.revenue || 0).toFixed(0)} ৳`} color="purple" />
-          <StatCard icon={<Icon name="users" size={22} />} label="Volunteers" value={apps.approved} sub={`${apps.pending || 0} pending`} color="green" />
-        </div>
-
-        {/* Charts row 1 — revenue + tickets */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginTop: 24 }}>
-          <ChartCard
-            title="Revenue Trend"
-            subtitle="Last 6 months · BDT"
-            height={260}
-            empty={monthlyRevenue.length === 0 ? 'No revenue yet — sell some tickets!' : null}
-          >
+        <div className={chartsGrid}>
+          <ChartCard title="Revenue Trend" subtitle="Last 6 months · BDT" height={260} empty={monthlyRevenue.length === 0 ? 'No revenue yet — sell some tickets!' : null} className="dashboard-section-enter" style={dashStagger(1).style}>
             <AreaTrend data={monthlyRevenue} xKey="month" yKey="revenue" color={CHART_COLORS.amber} valueLabel="৳" />
           </ChartCard>
 
-          <ChartCard
-            title="Tickets Sold per Event"
-            subtitle="Your last 5 events"
-            height={260}
-            empty={ticketsByEvent.length === 0 ? 'No tickets sold yet' : null}
-          >
+          <ChartCard title="Tickets Sold per Event" subtitle="Your last 5 events" height={260} empty={ticketsByEvent.length === 0 ? 'No tickets sold yet' : null} className="dashboard-section-enter" style={dashStagger(2).style}>
             <BarSeries data={ticketsByEvent} xKey="name" yKey="sold" color={CHART_COLORS.cyan} valueLabel="Tickets" />
           </ChartCard>
 
-          <ChartCard
-            title="Event Status"
-            subtitle="Across all your events"
-            height={260}
-            empty={eventsPie.length === 0 ? 'No events yet' : null}
-          >
-            <PieBreakdown
-              data={eventsPie}
-              colors={[CHART_COLORS.green, CHART_COLORS.cyan, CHART_COLORS.slate, CHART_COLORS.amber]}
-            />
+          <ChartCard title="Event Status" subtitle="Across all your events" height={260} empty={eventsPie.length === 0 ? 'No events yet' : null} className="dashboard-section-enter" style={dashStagger(3).style}>
+            <PieBreakdown data={eventsPie} colors={[CHART_COLORS.green, CHART_COLORS.cyan, CHART_COLORS.slate, CHART_COLORS.amber]} />
           </ChartCard>
         </div>
 
-        {/* Charts row 2 — attendance + revenue per event */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 20, marginTop: 20 }}>
-          <ChartCard
-            title="Expected vs Attended"
-            subtitle="Your last 5 events with sold tickets"
-            height={280}
-            empty={attendanceByEvent.length === 0 ? 'No attendance data yet' : null}
-          >
+        <div className={chartsGridWide}>
+          <ChartCard title="Expected vs Attended" subtitle="Your last 5 events with sold tickets" height={280} empty={attendanceByEvent.length === 0 ? 'No attendance data yet' : null} className="dashboard-section-enter" style={dashStagger(4).style}>
             <BarSeries
               data={attendanceByEvent}
               xKey="name"
@@ -125,37 +135,29 @@ export default function OrganizerDashboard() {
             />
           </ChartCard>
 
-          <ChartCard
-            title="Top Earning Events"
-            subtitle="Top 5 by revenue"
-            height={280}
-            empty={revenueByEvent.length === 0 ? 'No paid tickets sold yet' : null}
-          >
+          <ChartCard title="Top Earning Events" subtitle="Top 5 by revenue" height={280} empty={revenueByEvent.length === 0 ? 'No paid tickets sold yet' : null} className="dashboard-section-enter" style={dashStagger(5).style}>
             <BarSeries data={revenueByEvent} xKey="name" yKey="revenue" color={CHART_COLORS.purple} valueLabel="৳" />
           </ChartCard>
         </div>
 
-        {/* Top volunteers */}
         {data.topVolunteers?.length > 0 && (
-          <div className="card" style={{ marginTop: 20 }}>
-            <div className="card-title" style={{ marginBottom: 14 }}>Top Volunteers</div>
-            <div className="table-wrap">
+          <section className={`${card} ${cardMt} dashboard-section-enter`} style={dashStagger(6).style} aria-labelledby="organizer-top-volunteers">
+            <h2 id="organizer-top-volunteers" className={cardSectionTitle}>Top volunteers</h2>
+            <div className={tableWrap}>
               <table>
-                <thead><tr><th>Volunteer</th><th>Avg Rating</th><th>Reviews</th></tr></thead>
+                <thead><tr><th scope="col">Volunteer</th><th scope="col">Avg Rating</th><th scope="col">Reviews</th></tr></thead>
                 <tbody>
                   {data.topVolunteers.map((v, i) => (
                     <tr key={i}>
-                      <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{v.full_name || '—'}</td>
-                      <td>
-                        <Badge label={`${v.avg_rating} / 5`} color="amber" />
-                      </td>
-                      <td style={{ color: 'var(--text-muted)' }}>{v.total_ratings}</td>
+                      <td className={tdPrimary}>{v.full_name || '—'}</td>
+                      <td><Badge label={`${v.avg_rating} / 5`} color="amber" /></td>
+                      <td className={cellMuted}>{v.total_ratings}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
         )}
       </div>
     </>

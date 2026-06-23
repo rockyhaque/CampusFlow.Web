@@ -4,6 +4,9 @@ import useAuthStore from '../../stores/useAuthStore.js';
 import useToastStore from '../../stores/useToastStore.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
+import { authCard, authFooter, authForm, authLogo, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
+import Icon from '../../components/ui/Icon.jsx';
+import { btnPrimaryFullLg, btnSecondarySm, inputField, inputIcon, inputIconRight, inputIconWrap, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -38,29 +41,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-card">
-      <div className="auth-logo">
+    <div className={authCard}>
+      <div className={authLogo}>
         <AppLogo size="lg" />
       </div>
 
-      <h1 className="auth-title">Sign in</h1>
-      <p className="auth-subtitle">Enter your credentials to access the platform.</p>
+      <h1 className={authTitle}>Sign in</h1>
+      <p className={authSubtitle}>Enter your credentials to access the platform.</p>
 
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <form className={authForm} onSubmit={handleSubmit} noValidate>
         {/* Email */}
-        <div className="input-wrap">
-          <label className="input-label" htmlFor="email">Email address</label>
-          <div className="input-icon-wrap">
-            <span className="input-icon">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
+        <div className={inputWrap}>
+          <label className={inputLabel} htmlFor="email">Email address</label>
+          <div className={inputIconWrap}>
+            <span className={inputIcon}>
+              <Icon name="atSign" size={16} strokeWidth={1.75} />
             </span>
             <input
               id="email"
               name="email"
               type="email"
-              className="input-field"
+              className={inputField}
               placeholder="you@example.com"
               value={form.email}
               onChange={handleChange}
@@ -70,63 +71,43 @@ export default function LoginPage() {
         </div>
 
         {/* Password */}
-        <div className="input-wrap">
-          <label className="input-label" htmlFor="password">Password</label>
-          <div className="input-icon-wrap has-right-icon">
-            <span className="input-icon">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+        <div className={inputWrap}>
+          <label className={inputLabel} htmlFor="password">Password</label>
+          <div className={inputIconWrapRight}>
+            <span className={inputIcon}>
+              <Icon name="lock" size={16} strokeWidth={1.75} />
             </span>
             <input
               id="password"
               name="password"
               type={showPw ? 'text' : 'password'}
-              className="input-field"
+              className={inputField}
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
               autoComplete="current-password"
             />
-            <span className="input-icon-right" onClick={() => setShowPw(!showPw)}>
-              {showPw ? (
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              )}
+            <span className={inputIconRight} onClick={() => setShowPw(!showPw)}>
+              <Icon name={showPw ? 'eyeOff' : 'eye'} size={16} strokeWidth={1.75} />
             </span>
           </div>
         </div>
 
-        <div className="auth-row-end">
-          <Link to="/forgot-password" className="auth-link-sm">Forgot password?</Link>
+        <div className="-mt-2 flex justify-end">
+          <Link to="/forgot-password" className="text-[13px]">Forgot password?</Link>
         </div>
 
         {unverifiedEmail && (
-          <div style={{
-            background: 'rgba(245, 158, 11, 0.08)',
-            border: '1px solid rgba(245, 158, 11, 0.35)',
-            borderRadius: 10,
-            padding: '12px 14px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-          }}>
-            <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>
+          <div className="flex flex-col gap-2 rounded-[10px] border border-amber-500/[0.35] bg-amber-500/[0.08] px-3.5 py-3">
+            <div className="text-[13px] font-medium text-primary">
               Your email isn't verified yet
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <div className="text-xs leading-normal text-muted">
               Check your inbox for the 6-digit code we sent to <strong>{unverifiedEmail}</strong>.
             </div>
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              style={{ alignSelf: 'flex-start', marginTop: 2 }}
+              className={`${btnSecondarySm} mt-0.5 self-start`}
               onClick={() => navigate(`/verify-otp?email=${encodeURIComponent(unverifiedEmail)}&from=login`)}
             >
               Verify my email →
@@ -134,12 +115,12 @@ export default function LoginPage() {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={isLoading}>
+        <button type="submit" className={btnPrimaryFullLg} disabled={isLoading}>
           {isLoading ? <Spinner size="sm" /> : 'Sign in'}
         </button>
       </form>
 
-      <div className="auth-footer">
+      <div className={authFooter}>
         Don&apos;t have an account?{' '}
         <Link to="/register">Create one</Link>
       </div>

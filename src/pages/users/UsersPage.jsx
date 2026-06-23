@@ -7,8 +7,43 @@ import Pagination from '../../components/ui/Pagination.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { ConfirmModal } from '../../components/ui/Modal.jsx';
 import Icon from '../../components/ui/Icon.jsx';
+import EmptyState from '../../components/ui/EmptyState.jsx';
+import SearchInput from '../../components/ui/SearchInput.jsx';
 import { usersService } from '../../services/users.service.js';
 import useToastStore from '../../stores/useToastStore.js';
+import { pageActions, pageContent, pageHeader, pageSubtitle, pageTitle } from '../../components/layout/layoutClasses.js';
+import {
+  btnPrimarySm,
+  btnSuccessSm,
+  dropdownDivider,
+  dropdownItemTone,
+  dropdownPanel,
+  dropdownWrap,
+  inputSelectW148,
+  inputSelectW160,
+  kebabBtn,
+  tableActionsCol,
+  tableMeta,
+  tableMutedSm,
+  tableRowActions,
+  tableRowClickable,
+  tableUserCell,
+  tableUserEmail,
+  tableUserName,
+  tableWrap,
+} from '../../components/ui/componentClasses.js';
+import {
+  dashStagger,
+  dashboardError,
+  dashboardErrorRetry,
+  dashboardLoaded,
+  dropdownEnter,
+  formatRole,
+  rowNavProps,
+  usersFilterBar,
+  usersRowEnter,
+  usersTableCard,
+} from './usersClasses.js';
 
 const ROLES = ['ADMIN', 'ORGANIZER', 'VOLUNTEER', 'ATTENDEE'];
 const SORT_OPTIONS = [
@@ -22,70 +57,63 @@ const SORT_OPTIONS = [
 function KebabMenu({ user, onView, onToggleActive, onDelete }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const menuId = `user-menu-${user.id}`;
 
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const keyHandler = (e) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', keyHandler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', keyHandler);
+    };
   }, [open]);
 
   const action = (fn) => () => { setOpen(false); fn(); };
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} className={dropdownWrap}>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        style={{
-          width: 32, height: 32, borderRadius: 8, border: '1px solid var(--border-subtle)',
-          background: open ? 'var(--bg-hover)' : 'transparent',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--text-muted)', fontSize: 18, fontWeight: 700, lineHeight: 1,
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={(e) => { if (!open) e.currentTarget.style.background = 'var(--bg-hover)'; }}
-        onMouseLeave={(e) => { if (!open) e.currentTarget.style.background = 'transparent'; }}
+        className={kebabBtn(open)}
+        aria-label={`Actions for ${user.full_name || user.email}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
       >
-        ⋮
+        <span aria-hidden>⋮</span>
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute', right: 0, top: 36, zIndex: 100,
-          background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
-          borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-          minWidth: 160, overflow: 'hidden',
-        }}>
+        <div id={menuId} role="menu" className={`${dropdownPanel} ${dropdownEnter}`}>
           <MenuItem icon="eye" label="View profile" onClick={action(onView)} />
-          <div style={{ height: 1, background: 'var(--border-subtle)', margin: '2px 0' }} />
+          <div className={dropdownDivider} role="separator" />
           <MenuItem
             icon="power"
             label={user.is_active ? 'Deactivate' : 'Activate'}
-            color={user.is_active ? 'var(--amber-400)' : 'var(--green-400)'}
+            tone={user.is_active ? 'amber' : 'green'}
             onClick={action(onToggleActive)}
           />
-          <MenuItem icon="trash" label="Delete" color="var(--red-400)" onClick={action(onDelete)} />
+          <MenuItem icon="trash" label="Delete" tone="red" onClick={action(onDelete)} />
         </div>
       )}
     </div>
   );
 }
 
-function MenuItem({ icon, label, color, onClick }) {
-  const [hover, setHover] = useState(false);
+function MenuItem({ icon, label, tone, onClick }) {
+  const iconColor = tone === 'amber' ? 'var(--amber-400)' : tone === 'green' ? 'var(--green-400)' : tone === 'red' ? 'var(--red-400)' : 'var(--text-muted)';
   return (
     <button
+      type="button"
+      role="menuitem"
       onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-        padding: '9px 14px', border: 'none', background: hover ? 'var(--bg-hover)' : 'transparent',
-        cursor: 'pointer', color: color || 'var(--text-primary)', fontSize: 13,
-        textAlign: 'left', transition: 'background 0.12s',
-      }}
+      className={dropdownItemTone(tone)}
     >
-      <Icon name={icon} size={14} strokeWidth={2} color={color || 'var(--text-muted)'} />
+      <Icon name={icon} size={14} strokeWidth={2} color={iconColor} aria-hidden />
       {label}
     </button>
   );
@@ -95,16 +123,19 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sort, setSort] = useState('created_at:desc');
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
   const navigate = useNavigate();
 
   const load = useCallback(() => {
     setLoading(true);
+    setError(null);
     const [sortBy, sortOrder] = sort.split(':');
     const params = { page, limit: 15, sortBy, sortOrder };
     if (search) params.search = search;
@@ -118,19 +149,26 @@ export default function UsersPage() {
           setPagination({ ...main.pagination, totalPages: main.pagination.pages || 1 });
         }
       })
-      .catch(() => useToastStore.getState().error('Failed to load users'))
+      .catch((e) => {
+        const message = e.response?.data?.message || 'Failed to load users';
+        setError(message);
+        useToastStore.getState().error(message);
+      })
       .finally(() => setLoading(false));
   }, [page, search, role, statusFilter, sort]);
 
   useEffect(() => { load(); }, [load]);
 
   const handleApprove = async (id, name) => {
+    setApprovingId(id);
     try {
       await usersService.approveOrganizer(id);
       useToastStore.getState().success(`${name} approved as organizer.`);
       load();
     } catch (e) {
       useToastStore.getState().error(e.response?.data?.message || 'Approval failed.');
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -155,48 +193,57 @@ export default function UsersPage() {
     }
   };
 
+  const showContent = !loading && !error;
+
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="page-header">
+      <div className={`${pageContent} ${showContent ? dashboardLoaded : ''}`}>
+        <header className={pageHeader}>
           <div>
-            <div className="page-title">Users</div>
-            <div className="page-subtitle">
+            <h1 className={pageTitle}>Users</h1>
+            <p className={pageSubtitle}>
               Manage platform members{pagination.total != null ? ` · ${pagination.total} total` : ''}
-            </div>
+            </p>
           </div>
-        </div>
+          <div className={pageActions}>
+            <button
+              type="button"
+              className={`${btnPrimarySm} dashboard-enter`}
+              style={dashStagger(0).style}
+              onClick={() => navigate('/users/create-admin')}
+            >
+              + Create Admin
+            </button>
+          </div>
+        </header>
 
-        {/* Filters */}
-        <div className="filter-bar" style={{ flexWrap: 'wrap', gap: 10 }}>
-          <div className="search-wrap" style={{ flex: '1 1 220px', minWidth: 180 }}>
-            <span className="search-icon">
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
-              </svg>
-            </span>
-            <input
-              className="search-input"
-              placeholder="Search by name or email…"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            />
-          </div>
+        <div className={`${usersFilterBar} dashboard-enter`} style={dashStagger(1).style}>
+          <SearchInput
+            className="min-w-[180px] flex-[1_1_220px]"
+            variant="compact"
+            iconSize={15}
+            placeholder="Search by name or email…"
+            ariaLabel="Search users by name or email"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+          <label className="sr-only" htmlFor="users-role-filter">Filter by role</label>
           <select
-            className="input-field select-field"
-            style={{ height: 40, width: 148 }}
+            id="users-role-filter"
+            className={inputSelectW148}
             value={role}
             onChange={(e) => { setRole(e.target.value); setPage(1); }}
           >
             <option value="">All roles</option>
             {ROLES.map((r) => (
-              <option key={r} value={r}>{r.charAt(0) + r.slice(1).toLowerCase()}</option>
+              <option key={r} value={r}>{formatRole(r)}</option>
             ))}
           </select>
+          <label className="sr-only" htmlFor="users-status-filter">Filter by status</label>
           <select
-            className="input-field select-field"
-            style={{ height: 40, width: 148 }}
+            id="users-status-filter"
+            className={inputSelectW148}
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           >
@@ -204,9 +251,10 @@ export default function UsersPage() {
             <option value="true">Active</option>
             <option value="false">Inactive</option>
           </select>
+          <label className="sr-only" htmlFor="users-sort">Sort users</label>
           <select
-            className="input-field select-field"
-            style={{ height: 40, width: 160 }}
+            id="users-sort"
+            className={inputSelectW160}
             value={sort}
             onChange={(e) => { setSort(e.target.value); setPage(1); }}
           >
@@ -216,85 +264,109 @@ export default function UsersPage() {
           </select>
         </div>
 
-        {/* Table */}
-        <div className="table-wrap">
-          {loading ? (
-            <PageSpinner />
-          ) : users.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon" style={{ color: 'var(--text-muted)' }}>
-                <Icon name="users" size={40} strokeWidth={1.4} />
-              </div>
-              <div className="empty-state-title">No users found</div>
-              <div className="empty-state-desc">Try adjusting your search or filters.</div>
-            </div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Approved</th>
-                  <th>Joined</th>
-                  <th style={{ width: 48 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const name = u.full_name || u.email?.split('@')[0] || 'Unknown';
-                  return (
-                    <tr key={u.id}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Avatar name={name} src={u.photo_url} size="sm" />
-                          <div>
-                            <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{name}</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{u.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><Badge label={u.role} /></td>
-                      <td><Badge label={u.is_active ? 'active' : 'inactive'} /></td>
-                      <td>
-                        {u.role === 'ORGANIZER'
-                          ? <Badge label={u.is_approved ? 'approved' : 'pending'} />
-                          : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Auto</span>}
-                      </td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          {u.role === 'ORGANIZER' && !u.is_approved && (
-                            <button
-                              className="btn btn-success btn-sm"
-                              onClick={() => handleApprove(u.id, name)}
-                            >
-                              Approve
-                            </button>
-                          )}
-                          <KebabMenu
-                            user={u}
-                            onView={() => navigate(`/users/${u.id}`)}
-                            onToggleActive={() => handleToggleActive(u.id, u.is_active)}
-                            onDelete={() => setConfirmDelete(u)}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+        {loading && <PageSpinner />}
 
-        <Pagination
-          page={pagination.page || page}
-          totalPages={pagination.totalPages || 1}
-          onPageChange={(p) => setPage(p)}
-        />
+        {error && !loading && (
+          <div className={dashboardError} role="alert">
+            <Icon name="warning" size={16} />
+            <span>{error}</span>
+            <button type="button" className={dashboardErrorRetry} onClick={load}>Retry</button>
+          </div>
+        )}
+
+        {showContent && (
+          <div className={`${usersTableCard} dashboard-section-enter`} style={dashStagger(2).style} aria-busy={loading}>
+            <p className="sr-only" aria-live="polite">
+              Showing {users.length} user{users.length === 1 ? '' : 's'} on page {pagination.page || page} of {pagination.totalPages || 1}
+            </p>
+            {users.length === 0 ? (
+              <EmptyState
+                icon="users"
+                title="No users found"
+                description="Try adjusting your search or filters."
+              />
+            ) : (
+              <div className={tableWrap}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">User</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Approved</th>
+                      <th scope="col">Joined</th>
+                      <th scope="col" className={tableActionsCol}><span className="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((u, i) => {
+                      const name = u.full_name || u.email?.split('@')[0] || 'Unknown';
+                      return (
+                        <tr
+                          key={u.id}
+                          className={usersRowEnter}
+                          style={dashStagger(i).style}
+                        >
+                          <td
+                            className={tableRowClickable}
+                            aria-label={`View profile for ${name}`}
+                            {...rowNavProps(navigate, `/users/${u.id}`)}
+                          >
+                            <div className={tableUserCell}>
+                              <Avatar name={name} src={u.photo_url} size="sm" />
+                              <div>
+                                <div className={tableUserName}>{name}</div>
+                                <div className={tableUserEmail}>{u.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td><Badge label={u.role} /></td>
+                          <td><Badge label={u.is_active ? 'active' : 'inactive'} /></td>
+                          <td>
+                            {u.role === 'ORGANIZER'
+                              ? <Badge label={u.is_approved ? 'approved' : 'pending'} />
+                              : <span className={tableMutedSm}>Auto</span>}
+                          </td>
+                          <td className={tableMeta}>
+                            {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
+                          </td>
+                          <td>
+                            <div className={tableRowActions}>
+                              {u.role === 'ORGANIZER' && !u.is_approved && (
+                                <button
+                                  type="button"
+                                  className={btnSuccessSm}
+                                  disabled={approvingId === u.id}
+                                  onClick={() => handleApprove(u.id, name)}
+                                >
+                                  {approvingId === u.id ? 'Approving…' : 'Approve'}
+                                </button>
+                              )}
+                              <KebabMenu
+                                user={u}
+                                onView={() => navigate(`/users/${u.id}`)}
+                                onToggleActive={() => handleToggleActive(u.id, u.is_active)}
+                                onDelete={() => setConfirmDelete(u)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {showContent && users.length > 0 && (
+          <Pagination
+            page={pagination.page || page}
+            totalPages={pagination.totalPages || 1}
+            onPageChange={(p) => setPage(p)}
+          />
+        )}
 
         <ConfirmModal
           isOpen={!!confirmDelete}

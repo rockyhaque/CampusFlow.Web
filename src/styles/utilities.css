@@ -1,0 +1,224 @@
+/* Utilities & keyframes */
+
+@layer utilities {
+  .bg-accent-gradient {
+    background: var(--gradient-accent);
+  }
+
+  .cf-var-banner {
+    background: var(--cf-banner) center / cover no-repeat;
+  }
+
+  .cf-var-banner-img {
+    background-image: var(--cf-banner);
+  }
+
+  .cf-var-event-banner {
+    background:
+      linear-gradient(180deg, rgba(2, 6, 23, 0.05) 0%, rgba(2, 6, 23, 0.78) 100%),
+      var(--cf-banner) center / cover no-repeat;
+  }
+
+  .cf-var-progress {
+    width: var(--cf-progress);
+  }
+
+  .cf-var-bg {
+    background: var(--cf-bg);
+  }
+
+  .cf-var-h {
+    height: var(--cf-h);
+  }
+
+  .cf-var-w {
+    width: var(--cf-w);
+  }
+
+  .cf-var-spinner {
+    color: var(--cf-spinner-color);
+    border-top-color: var(--cf-spinner-color);
+  }
+
+  .cf-text-gradient {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    @apply text-transparent;
+  }
+
+  .cf-online-dot {
+    @apply inline-block size-2 rounded-full;
+    background: var(--gradient-accent);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.7);
+  }
+
+  .cf-spinner {
+    @apply inline-block size-[18px] animate-spin rounded-full border-2 border-white/25;
+    border-top-color: var(--white);
+  }
+
+  .animate-cf-tick {
+    animation: cf-tick 1s linear;
+  }
+
+  .animate-cf-blink {
+    animation: cf-blink 1s linear infinite;
+  }
+
+  .dashboard-enter {
+    animation: dashboardRise 220ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: calc(var(--dash-i, 0) * 45ms);
+  }
+
+  /* Below-the-fold only — no opacity gate on first paint (better LCP) */
+  .dashboard-section-enter {
+    animation: dashboardSectionRise 260ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: calc(var(--dash-i, 0) * 55ms + 100ms);
+  }
+
+  .dashboard-loaded .dashboard-enter,
+  .dashboard-loaded .dashboard-section-enter {
+    animation-play-state: running;
+  }
+
+  .leaderboard-enter {
+    animation: dashboardRise 220ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: calc(var(--lb-i, 0) * 45ms);
+  }
+
+  .leaderboard-section-enter {
+    animation: dashboardRise 260ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: calc(var(--lb-i, 0) * 55ms + 100ms);
+  }
+
+  .leaderboard-podium-enter {
+    animation: dashboardRise 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--lb-i, 0) * 70ms + 180ms);
+  }
+
+  .leaderboard-row-enter {
+    animation: dashboardRise 200ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: calc(var(--lb-i, 0) * 35ms);
+  }
+
+  .leaderboard-loaded .leaderboard-enter,
+  .leaderboard-loaded .leaderboard-section-enter,
+  .leaderboard-loaded .leaderboard-podium-enter,
+  .leaderboard-loaded .leaderboard-row-enter {
+    animation-play-state: running;
+  }
+
+  .dropdown-panel-enter {
+    animation: dashboardRise 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cf-tick {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0.5;
+  }
+  15% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes cf-blink {
+  0%,
+  49% {
+    opacity: 0.5;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes dashboardRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dashboardSectionRise {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-enter,
+  .dashboard-section-enter,
+  .dropdown-panel-enter,
+  .leaderboard-enter,
+  .leaderboard-section-enter,
+  .leaderboard-podium-enter,
+  .leaderboard-row-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

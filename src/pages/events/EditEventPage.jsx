@@ -8,6 +8,18 @@ import DateTimePicker from '../../components/ui/DateTimePicker.jsx';
 import { eventsService } from '../../services/events.service.js';
 import useToastStore from '../../stores/useToastStore.js';
 import { PageSpinner, Spinner } from '../../components/ui/Spinner.jsx';
+import { formGrid, formGridSpan2, pageContent, pageHeader, pageSubtitle, pageTitle } from '../../components/layout/layoutClasses.js';
+import { btnPrimary, btnSecondary, btnSecondarySm, inputField, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
+import {
+  eventFormShell, eventFormBg, eventCreateGrid, eventSection, eventSectionTitle,
+  eventCoverBottom, eventActionsBottom, eventDescription, requiredStar,
+  locationChoice, locationPill, locationPillDot, locationPillLabel, fieldHint,
+  ticketingCheck, ticketingNote, eventBannerPreview, eventBannerImg, eventBannerActions,
+  eventFileHidden, eventUploadDrop, eventUploadIcon, eventUploadText, eventUploadTitle,
+  eventUploadSub, eventActions, btnWait,
+  paymentTypesGroup, paymentTypesLabel, paymentTypeOption, paymentTypeCheckbox,
+  paymentTypeTitle, paymentTypeDesc,
+} from './eventFormClasses.js';
 
 const MAX_BANNER_MB = 5;
 
@@ -25,7 +37,7 @@ export default function EditEventPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [bannerUrl, setBannerUrl] = useState(null);
-  const [bannerFile, setBannerFile] = useState(null);
+  const [, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
   const [bannerUploading, setBannerUploading] = useState(false);
   const toast = useToastStore();
@@ -154,7 +166,7 @@ export default function EditEventPage() {
   if (loading) return (
     <>
       <Topbar />
-      <div className="page-content"><PageSpinner /></div>
+      <div className={pageContent}><PageSpinner /></div>
     </>
   );
 
@@ -163,28 +175,28 @@ export default function EditEventPage() {
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="event-form-shell">
-          <div className="page-header">
+      <div className={pageContent}>
+        <div className={eventFormShell}>
+          <div className={pageHeader}>
             <div>
-              <div className="page-title">Edit Event</div>
-              <div className="page-subtitle">Update event details</div>
+              <div className={pageTitle}>Edit Event</div>
+              <div className={pageSubtitle}>Update event details</div>
             </div>
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="event-form-bg">
-              <div className="event-create-grid">
+            <div className={eventFormBg}>
+              <div className={eventCreateGrid}>
                 {/* Left column */}
                 <div className="event-create-left">
-                  <div className="event-section">
-                    <div className="event-section-title">Event Details</div>
-                    <div className="form-grid">
-                      <div className="input-wrap span-2">
-                        <label className="input-label" htmlFor="title">Title <span className="required-star">*</span></label>
-                        <input id="title" name="title" className="input-field" placeholder="Event title" value={form.title} onChange={handleChange} required />
+                  <div className={eventSection}>
+                    <div className={eventSectionTitle}>Event Details</div>
+                    <div className={formGrid}>
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel} htmlFor="title">Title <span className={requiredStar}>*</span></label>
+                        <input id="title" name="title" className={inputField} placeholder="Event title" value={form.title} onChange={handleChange} required />
                       </div>
-                      <div className="input-wrap span-2">
-                        <label className="input-label" htmlFor="category">Category</label>
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel} htmlFor="category">Category</label>
                         <SelectMenu
                           value={form.category}
                           onChange={(v) => setForm((f) => ({ ...f, category: v }))}
@@ -197,42 +209,40 @@ export default function EditEventPage() {
                           allowClear={false}
                         />
                       </div>
-                      <div className="input-wrap span-2">
-                        <label className="input-label" htmlFor="description">Description</label>
-                        <textarea id="description" name="description" className="textarea-field event-description" placeholder="Describe your event…" value={form.description} onChange={handleChange} rows={5} />
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel} htmlFor="description">Description</label>
+                        <textarea id="description" name="description" className={`textarea-field ${eventDescription}`} placeholder="Describe your event…" value={form.description} onChange={handleChange} rows={5} />
                       </div>
                     </div>
                   </div>
 
                   {/* Ticketing */}
-                  <div className="event-section">
-                    <div className="event-section-title">Ticketing</div>
-                    <label className="ticketing-check">
+                  <div className={eventSection}>
+                    <div className={eventSectionTitle}>Ticketing</div>
+                    <label className={ticketingCheck}>
                       <input type="checkbox" name="is_paid" checked={form.is_paid} onChange={handleChange} />
                       <span>This is a paid event</span>
                     </label>
                     {form.is_paid && (
                       <>
-                        <div style={{ margin: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-                            Accepted payment types
-                          </div>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: `1px solid ${form.allow_cash ? 'rgba(139,92,246,0.35)' : 'var(--border-subtle)'}`, borderRadius: 10, cursor: 'pointer', background: form.allow_cash ? 'rgba(139,92,246,0.05)' : 'transparent', transition: 'all 0.15s' }}>
-                            <input type="checkbox" name="allow_cash" checked={form.allow_cash} onChange={handleChange} style={{ accentColor: 'var(--accent)', width: 16, height: 16 }} />
+                        <div className={paymentTypesGroup}>
+                          <div className={paymentTypesLabel}>Accepted payment types</div>
+                          <label className={paymentTypeOption(form.allow_cash)}>
+                            <input type="checkbox" name="allow_cash" checked={form.allow_cash} onChange={handleChange} className={paymentTypeCheckbox} />
                             <div>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Cash at venue</div>
-                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Attendees reserve now and pay at the event</div>
+                              <div className={paymentTypeTitle}>Cash at venue</div>
+                              <div className={paymentTypeDesc}>Attendees reserve now and pay at the event</div>
                             </div>
                           </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: `1px solid ${form.allow_online ? 'rgba(139,92,246,0.35)' : 'var(--border-subtle)'}`, borderRadius: 10, cursor: 'pointer', background: form.allow_online ? 'rgba(139,92,246,0.05)' : 'transparent', transition: 'all 0.15s' }}>
-                            <input type="checkbox" name="allow_online" checked={form.allow_online} onChange={handleChange} style={{ accentColor: 'var(--accent)', width: 16, height: 16 }} />
+                          <label className={paymentTypeOption(form.allow_online)}>
+                            <input type="checkbox" name="allow_online" checked={form.allow_online} onChange={handleChange} className={paymentTypeCheckbox} />
                             <div>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Online transfer</div>
-                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>bKash, Nagad, Rocket, Bank — add accounts below</div>
+                              <div className={paymentTypeTitle}>Online transfer</div>
+                              <div className={paymentTypeDesc}>bKash, Nagad, Rocket, Bank — add accounts below</div>
                             </div>
                           </label>
                         </div>
-                        <div className="ticketing-note">
+                        <div className={ticketingNote}>
                           Set ticket type prices (General, Student, VIP) in the event&apos;s <strong>Manage</strong> page.
                         </div>
                         {form.allow_online && <PaymentMethodsManager eventId={id} />}
@@ -243,31 +253,32 @@ export default function EditEventPage() {
 
                 {/* Right column */}
                 <div className="event-create-right">
-                  <div className="event-section">
-                    <div className="event-section-title">Schedule & Capacity</div>
-                    <div className="form-grid">
-                      <div className="input-wrap span-2">
-                        <label className="input-label">Location</label>
+                  <div className={eventSection}>
+                    <div className={eventSectionTitle}>Schedule & Capacity</div>
+                    <div className={formGrid}>
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel}>Location</label>
                         {(() => {
                           const currentMode = form.location_mode || (form.location?.match(/^https?:\/\//) ? 'online' : 'in_person');
                           return (
-                            <div className="location-choice" role="radiogroup" aria-label="Location mode">
+                            <div className={locationChoice} role="radiogroup" aria-label="Location mode">
                               {[
                                 { value: 'in_person', label: 'In person' },
                                 { value: 'online', label: 'Zoom / Online' },
                               ].map((opt) => {
                                 const active = currentMode === opt.value;
                                 return (
-                                  <label key={opt.value} className={`location-pill${active ? ' is-active' : ''}`}>
+                                  <label key={opt.value} className={locationPill(active)}>
                                     <input
                                       type="radio"
                                       name="location_mode"
                                       value={opt.value}
                                       checked={active}
                                       onChange={() => setForm((f) => ({ ...f, location_mode: opt.value, location: '' }))}
+                                      className="pointer-events-none absolute opacity-0"
                                     />
-                                    <span className="location-pill__dot" aria-hidden="true" />
-                                    <span className="location-pill__label">{opt.label}</span>
+                                    <span className={locationPillDot(active)} aria-hidden="true" />
+                                    <span className={locationPillLabel}>{opt.label}</span>
                                   </label>
                                 );
                               })}
@@ -279,7 +290,7 @@ export default function EditEventPage() {
                             id="location"
                             name="location"
                             type="url"
-                            className="input-field"
+                            className={inputField}
                             placeholder="https://zoom.us/j/123…  or  https://meet.google.com/…"
                             value={form.location}
                             onChange={handleChange}
@@ -288,7 +299,7 @@ export default function EditEventPage() {
                           <input
                             id="location"
                             name="location"
-                            className="input-field"
+                            className={inputField}
                             placeholder="Conference Hall A, Building 3"
                             value={form.location}
                             onChange={handleChange}
@@ -296,15 +307,15 @@ export default function EditEventPage() {
                         )}
                       </div>
 
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="start_date">Start Date <span className="required-star">*</span></label>
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="start_date">Start Date <span className={requiredStar}>*</span></label>
                         <DateTimePicker
                           value={form.start_date}
                           onChange={(v) => setForm((f) => ({ ...f, start_date: v }))}
                         />
                       </div>
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="end_date">End Date <span className="required-star">*</span></label>
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="end_date">End Date <span className={requiredStar}>*</span></label>
                         <DateTimePicker
                           value={form.end_date}
                           onChange={(v) => setForm((f) => ({ ...f, end_date: v }))}
@@ -312,57 +323,57 @@ export default function EditEventPage() {
                         />
                       </div>
 
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="max_attendees">Attendee Capacity</label>
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="max_attendees">Attendee Capacity</label>
                         <input
                           id="max_attendees"
                           name="max_attendees"
                           type="number"
                           min="0"
-                          className="input-field"
+                          className={inputField}
                           placeholder="Unlimited"
                           value={form.max_attendees}
                           onChange={handleChange}
                         />
-                        <div className="field-hint">Total tickets across all types.</div>
+                        <div className={fieldHint}>Total tickets across all types.</div>
                       </div>
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="max_volunteers">Volunteer Capacity</label>
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="max_volunteers">Volunteer Capacity</label>
                         <input
                           id="max_volunteers"
                           name="max_volunteers"
                           type="number"
                           min="0"
-                          className="input-field"
+                          className={inputField}
                           placeholder="Unlimited"
                           value={form.max_volunteers}
                           onChange={handleChange}
                         />
-                        <div className="field-hint">Total volunteers across all roles.</div>
+                        <div className={fieldHint}>Total volunteers across all roles.</div>
                       </div>
 
-                      <div className="input-wrap span-2">
-                        <label className="input-label" htmlFor="attendee_registration_deadline">Ticket Sales Deadline</label>
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel} htmlFor="attendee_registration_deadline">Ticket Sales Deadline</label>
                         <DateTimePicker
                           value={form.attendee_registration_deadline}
                           onChange={(v) => setForm((f) => ({ ...f, attendee_registration_deadline: v }))}
                           max={form.start_date || undefined}
                           placeholder="Select deadline…"
                         />
-                        <div className="field-hint">
+                        <div className={fieldHint}>
                           Last date attendees can buy tickets. Must be on or before the event starts.
                         </div>
                       </div>
 
-                      <div className="input-wrap span-2">
-                        <label className="input-label" htmlFor="volunteer_registration_deadline">Volunteer Application Deadline</label>
+                      <div className={`input-wrap ${formGridSpan2}`}>
+                        <label className={inputLabel} htmlFor="volunteer_registration_deadline">Volunteer Application Deadline</label>
                         <DateTimePicker
                           value={form.volunteer_registration_deadline}
                           onChange={(v) => setForm((f) => ({ ...f, volunteer_registration_deadline: v }))}
                           max={form.end_date || undefined}
                           placeholder="Select deadline…"
                         />
-                        <div className="field-hint">
+                        <div className={fieldHint}>
                           Last date volunteers can apply. Can stay open until the event ends.
                         </div>
                       </div>
@@ -372,44 +383,44 @@ export default function EditEventPage() {
               </div>
 
               {/* Banner upload (bottom) */}
-              <div className="event-section event-cover-bottom">
-                <div className="event-section-title">Cover Image</div>
+              <div className={eventCoverBottom}>
+                <div className={eventSectionTitle}>Cover Image</div>
                 {(bannerPreview || bannerUrl) ? (
-                  <div className={`event-banner-preview${bannerUploading ? ' is-uploading' : ''}`}>
-                    <img src={bannerPreview || bannerUrl} alt="Banner preview" className="event-banner-img" />
+                  <div className={eventBannerPreview}>
+                    <img src={bannerPreview || bannerUrl} alt="Banner preview" className={eventBannerImg(bannerUploading)} />
                     {bannerUploading && (
-                      <div className="event-banner-actions">
-                        <span className="btn btn-secondary btn-sm btn-wait">
+                      <div className={eventBannerActions}>
+                        <span className={`btn btn-secondary btn-sm ${btnWait}`}>
                           <Spinner size="sm" /> Uploading…
                         </span>
                       </div>
                     )}
                     {!bannerUploading && (
-                      <div className="event-banner-actions">
-                        <label className="btn btn-secondary btn-sm">
+                      <div className={eventBannerActions}>
+                        <label className={btnSecondarySm}>
                           <Icon name="edit" size={14} /> Replace
-                          <input type="file" accept="image/*" onChange={handleBannerSelect} className="event-file-hidden" />
+                          <input type="file" accept="image/*" onChange={handleBannerSelect} className={eventFileHidden} />
                         </label>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <label className={`event-upload-drop${bannerUploading ? ' is-uploading' : ''}`}>
-                    <div className="event-upload-icon">
+                  <label className={eventUploadDrop(bannerUploading)}>
+                    <div className={eventUploadIcon}>
                       {bannerUploading ? <Spinner size="sm" /> : <Icon name="download" size={22} />}
                     </div>
-                    <div className="event-upload-text">
-                      <div className="event-upload-title">{bannerUploading ? 'Uploading…' : 'Click to upload event banner'}</div>
-                      <div className="event-upload-sub">JPG, PNG or WebP · Max {MAX_BANNER_MB}MB · Recommended 1600 × 600</div>
+                    <div className={eventUploadText}>
+                      <div className={eventUploadTitle}>{bannerUploading ? 'Uploading…' : 'Click to upload event banner'}</div>
+                      <div className={eventUploadSub}>JPG, PNG or WebP · Max {MAX_BANNER_MB}MB · Recommended 1600 × 600</div>
                     </div>
-                    <input type="file" accept="image/*" onChange={handleBannerSelect} className="event-file-hidden" disabled={bannerUploading} />
+                    <input type="file" accept="image/*" onChange={handleBannerSelect} className={eventFileHidden} disabled={bannerUploading} />
                   </label>
                 )}
               </div>
 
-              <div className="event-actions event-actions-bottom">
-                <button type="button" className="btn btn-secondary" onClick={() => navigate(`/events/${id}`)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
+              <div className={`${eventActions} ${eventActionsBottom}`}>
+                <button type="button" className={btnSecondary} onClick={() => navigate(`/events/${id}`)}>Cancel</button>
+                <button type="submit" className={btnPrimary} disabled={saving}>
                   {saving ? <Spinner size="sm" /> : 'Save Changes'}
                 </button>
               </div>

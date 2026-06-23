@@ -5,6 +5,8 @@ import useToastStore from '../../stores/useToastStore.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
 import Icon from '../../components/ui/Icon.jsx';
+import { authCard, authFooter, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
+import { btnPrimaryFullLg } from '../../components/ui/componentClasses.js';
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 30; // seconds
@@ -16,7 +18,7 @@ export default function VerifyOtpPage() {
 
   const initialEmail = params.get('email') || '';
   const fromLogin = params.get('from') === 'login';
-  const [email, setEmail] = useState(initialEmail);
+  const [email] = useState(initialEmail);
   const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(''));
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
@@ -115,22 +117,22 @@ export default function VerifyOtpPage() {
   };
 
   return (
-    <div className="auth-card auth-center">
-      <div className="auth-logo-center">
+    <div className={`${authCard} text-center`}>
+      <div className="mb-7 flex items-center justify-center">
         <AppLogo size="lg" />
       </div>
 
-      <div className="auth-badge-icon">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] bg-violet-500/10 text-purple-600">
         <Icon name="shield" size={28} strokeWidth={1.6} />
       </div>
-      <h1 className="auth-title auth-title-tight">Verify your email</h1>
-      <p className="auth-subtitle auth-subtitle-tight">
+      <h1 className={`${authTitle} mb-1.5`}>Verify your email</h1>
+      <p className={`${authSubtitle} mb-2`}>
         We sent a 6-digit code to
       </p>
-      <p className="auth-email-highlight">{email}</p>
+      <p className="mb-7 break-all text-sm font-semibold text-purple-600">{email}</p>
 
       <form onSubmit={handleVerify}>
-        <div className="auth-otp-row">
+        <div className="mb-7 flex justify-center gap-2">
           {digits.map((d, i) => (
             <input
               key={i}
@@ -142,37 +144,37 @@ export default function VerifyOtpPage() {
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
-              className={`otp-input${d ? ' filled' : ''}`}
+              className={`h-[52px] w-11 rounded-[10px] border-[1.5px] bg-[#f1f3fa] text-center font-mono text-[22px] font-semibold text-slate-900 outline-none transition-[border-color,box-shadow,background] duration-[120ms] focus:border-purple-600 focus:shadow-[0_0_0_3px_rgba(139,92,246,0.16)] ${d ? 'border-purple-600 bg-violet-500/[0.06]' : 'border-slate-900/12'}`}
             />
           ))}
         </div>
 
         <button
           type="submit"
-          className="btn btn-primary btn-full btn-lg"
+          className={btnPrimaryFullLg}
           disabled={verifying || digits.join('').length !== OTP_LENGTH}
         >
           {verifying ? <Spinner size="sm" /> : 'Verify Email'}
         </button>
       </form>
 
-      <div className="auth-resend">
+      <div className="mt-6 text-[13px] text-slate-500">
         Didn't get the code?{' '}
         {cooldown > 0 ? (
-          <span className="auth-resend-muted">Resend in {cooldown}s</span>
+          <span>Resend in {cooldown}s</span>
         ) : (
           <button
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="auth-resend-btn"
+            className="cursor-pointer border-none bg-transparent p-0 text-[13px] font-medium text-purple-600 disabled:cursor-wait disabled:opacity-80"
           >
             {resending ? 'Sending…' : 'Resend code'}
           </button>
         )}
       </div>
 
-      <div className="auth-footer auth-footer-tight">
+      <div className={`${authFooter} mt-[18px]`}>
         <Link to={fromLogin ? '/login' : '/register'}>← Back to {fromLogin ? 'login' : 'register'}</Link>
       </div>
     </div>

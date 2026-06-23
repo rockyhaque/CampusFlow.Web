@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar.jsx';
+import { appShell, mainContent, sidebarBackdrop } from '../components/layout/layoutClasses.js';
 import useNotifStore from '../stores/useNotifStore.js';
 import useMobileNavStore from '../stores/useMobileNavStore.js';
 
@@ -34,13 +35,13 @@ export default function AppLayout() {
   }, [drawerOpen]);
 
   return (
-    <div className="app-shell">
+    <div className={appShell}>
       <Sidebar />
-      <div className="main-content">
+      <div className={mainContent}>
         {drawerOpen && (
           <button
             type="button"
-            className="sidebar-backdrop"
+            className={sidebarBackdrop}
             aria-label="Close navigation menu"
             onClick={closeDrawer}
           />

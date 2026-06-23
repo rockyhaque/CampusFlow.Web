@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import { paymentMethodsService, PAYMENT_METHOD_TYPES } from '../../services/paymentMethods.service.js';
+import { useEffect, useState, useCallback } from 'react';
+import { paymentMethodsService, PAYMENT_METHOD_TYPES, paymentTypeBadgeClass } from '../../services/paymentMethods.service.js';
 import useToastStore from '../../stores/useToastStore.js';
 import Icon from '../ui/Icon.jsx';
 import { Spinner } from '../ui/Spinner.jsx';
 import SelectMenu from '../ui/SelectMenu.jsx';
+import { formGrid, formGridSpan2 } from '../layout/layoutClasses.js';
+import { btnGhostSm, btnPrimarySm, btnSecondarySm, inputField, inputLabel, inputWrap, textareaField } from '../ui/componentClasses.js';
 
 const blank = { methodType: 'bkash', accountName: '', accountNumber: '', accountLabel: '', instructions: '' };
 
@@ -21,7 +23,7 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
   const [form, setForm] = useState(blank);
   const [saving, setSaving] = useState(false);
 
-  const fetchMethods = async () => {
+  const fetchMethods = useCallback(async () => {
     if (!eventId) return;
     setLoading(true);
     try {
@@ -30,9 +32,9 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
     } catch {
       useToastStore.getState().error('Failed to load payment methods.');
     } finally { setLoading(false); }
-  };
+  }, [eventId]);
 
-  useEffect(() => { fetchMethods(); /* eslint-disable-next-line */ }, [eventId]);
+  useEffect(() => { fetchMethods(); }, [fetchMethods]);
 
   const startCreate = () => { setForm(blank); setEditing('new'); };
   const startEdit = (m) => {
@@ -97,29 +99,28 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
   };
 
   const typeLabel = (t) => PAYMENT_METHOD_TYPES.find((x) => x.value === t)?.label || t;
-  const typeColor = (t) => PAYMENT_METHOD_TYPES.find((x) => x.value === t)?.color || '#64748b';
 
   return (
     <div>
-      <div className="pm-header">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <div className="pm-title">Payment Methods</div>
+          <div className="text-sm font-semibold text-slate-900">Payment Methods</div>
         </div>
         {!editing && (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={startCreate}>
+          <button type="button" className={btnSecondarySm} onClick={startCreate}>
             <Icon name="plus" size={13} /> Add
           </button>
         )}
       </div>
 
       {loading ? (
-        <div className="pm-loading"><Spinner /></div>
+        <div className="py-3.5 text-center"><Spinner /></div>
       ) : methods.length === 0 && !editing ? (
-        <div className="pm-empty">
+        <div className="rounded-[10px] border border-dashed border-violet-500/22 bg-violet-500/5 px-4 py-5 text-center text-[13px] text-slate-500">
           No payment methods yet. Without one, attendees can only pay in cash at the venue.
         </div>
       ) : (
-        <div className="pm-list">
+        <div className="flex flex-col gap-2">
           {methods.map((m) => {
             const type = m.method_type || m.methodType;
             const num = m.account_number || m.accountNumber;
@@ -129,26 +130,28 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
             return (
               <div
                 key={m.id || m._localId}
-                className="pm-item"
+                className="flex items-center gap-3.5 rounded-[10px] border border-slate-900/8 bg-white/70 px-3.5 py-3"
               >
-                <span className="pm-type-pill" style={{ background: typeColor(type), display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px 3px 5px' }}>
-                  {(() => { const t = PAYMENT_METHOD_TYPES.find((x) => x.value === type); return t?.icon ? <img src={t.icon} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} /> : null; })()}
+                <span
+                  className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-[3px] pl-1.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-[0_8px_18px_rgba(2,6,23,0.08)] ${paymentTypeBadgeClass(type)}`}
+                >
+                  {(() => { const t = PAYMENT_METHOD_TYPES.find((x) => x.value === type); return t?.icon ? <img src={t.icon} alt="" className="h-5 w-5 shrink-0 rounded object-cover" /> : null; })()}
                   {typeLabel(type)}
                 </span>
-                <div className="pm-body">
-                  <div className="pm-main">
-                    {num} {label && <span className="pm-label">· {label}</span>}
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-slate-900">
+                    {num} {label && <span className="text-xs font-normal text-slate-500">· {label}</span>}
                   </div>
                   {(name || instr) && (
-                    <div className="pm-sub">
+                    <div className="mt-0.5 text-xs text-slate-500">
                       {name}{name && instr ? ' · ' : ''}{instr}
                     </div>
                   )}
                 </div>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => startEdit(m)} title="Edit">
+                <button type="button" className={btnGhostSm} onClick={() => startEdit(m)} title="Edit">
                   <Icon name="edit" size={13} />
                 </button>
-                <button type="button" className="btn btn-ghost btn-sm pm-remove" onClick={() => remove(m)} title="Remove">
+                <button type="button" className={`${btnGhostSm} text-red-400`} onClick={() => remove(m)} title="Remove">
                   <Icon name="trash" size={13} />
                 </button>
               </div>
@@ -161,10 +164,10 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
         // NOTE: This is a <div> (not a <form>) because this component is often rendered
         // inside a parent <form> (e.g. CreateEventPage). Nested forms are invalid HTML
         // and would cause the parent form to submit when "Add Method" is clicked.
-        <div className="pm-editor">
-          <div className="form-grid">
-            <div className="input-wrap">
-              <label className="input-label">Method type *</label>
+        <div className="mt-3 rounded-[10px] border border-violet-500/18 bg-violet-500/5 p-4">
+          <div className={formGrid}>
+            <div className={inputWrap}>
+              <label className={inputLabel}>Method type *</label>
               <SelectMenu
                 value={form.methodType}
                 onChange={(v) => setForm((f) => ({ ...f, methodType: v }))}
@@ -174,11 +177,11 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
                 allowClear={false}
               />
             </div>
-            <div className="input-wrap">
-              <label className="input-label">Account number *</label>
+            <div className={inputWrap}>
+              <label className={inputLabel}>Account number *</label>
               <input
                 type="text"
-                className="input-field"
+                className={inputField}
                 placeholder="01712345678"
                 value={form.accountNumber}
                 onChange={(e) => setForm((f) => ({ ...f, accountNumber: e.target.value }))}
@@ -188,32 +191,32 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
                 }}
               />
             </div>
-            <div className="input-wrap">
-              <label className="input-label">Account name</label>
+            <div className={inputWrap}>
+              <label className={inputLabel}>Account name</label>
               <input
                 type="text"
-                className="input-field"
+                className={inputField}
                 placeholder="Test event committee"
                 value={form.accountName}
                 onChange={(e) => setForm((f) => ({ ...f, accountName: e.target.value }))}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); save(e); } }}
               />
             </div>
-            <div className="input-wrap">
-              <label className="input-label">Account type / label</label>
+            <div className={inputWrap}>
+              <label className={inputLabel}>Account type / label</label>
               <input
                 type="text"
-                className="input-field"
+                className={inputField}
                 placeholder="Personal, Merchant, Savings…"
                 value={form.accountLabel}
                 onChange={(e) => setForm((f) => ({ ...f, accountLabel: e.target.value }))}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); save(e); } }}
               />
             </div>
-            <div className="input-wrap span-2">
-              <label className="input-label">Instructions (optional)</label>
+            <div className={`input-wrap ${formGridSpan2}`}>
+              <label className={inputLabel}>Instructions (optional)</label>
               <textarea
-                className="textarea-field pm-instructions"
+                className={`${textareaField} bg-white focus:shadow-[0_0_0_3px_rgba(139,92,246,0.14)]`}
                 rows={2}
                 placeholder="Send via Send Money — no fee"
                 value={form.instructions}
@@ -221,9 +224,9 @@ export default function PaymentMethodsManager({ eventId, onLocalChange }) {
               />
             </div>
           </div>
-          <div className="pm-actions">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={cancel}>Cancel</button>
-            <button type="button" className="btn btn-primary btn-sm" onClick={save} disabled={saving}>
+          <div className="mt-3 flex justify-end gap-2.5">
+            <button type="button" className={btnGhostSm} onClick={cancel}>Cancel</button>
+            <button type="button" className={btnPrimarySm} onClick={save} disabled={saving}>
               {saving ? <Spinner size="sm" /> : (editing === 'new' ? 'Add Method' : 'Save Changes')}
             </button>
           </div>

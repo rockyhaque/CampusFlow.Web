@@ -1,4 +1,9 @@
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { inputField } from './componentClasses.js';
+
+const calendarClassName =
+  'cf-datepicker overflow-hidden rounded-2xl border border-slate-900/10 font-sans shadow-[0_18px_48px_rgba(2,6,23,0.14)]';
 
 function toLocalInputValue(date) {
   if (!date) return '';
@@ -23,7 +28,8 @@ export default function DateTimePicker({ value, onChange, min, max, placeholder 
       placeholderText={placeholder}
       minDate={min ? fromLocalInputValue(min) : undefined}
       maxDate={max ? fromLocalInputValue(max) : undefined}
-      className="input-field dtp-input"
+      className={`${inputField} cursor-pointer`}
+      calendarClassName={calendarClassName}
       popperPlacement="bottom-start"
     />
   );

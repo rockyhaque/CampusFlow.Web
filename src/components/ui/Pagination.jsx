@@ -1,3 +1,6 @@
+import Icon from './Icon.jsx';
+import { pageBtn, pageBtnActive, pagination } from './componentClasses.js';
+
 export default function Pagination({ page, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
@@ -13,25 +16,28 @@ export default function Pagination({ page, totalPages, onPageChange }) {
   if (totalPages > 1) pages.push(totalPages);
 
   return (
-    <div className="pagination">
+    <nav className={pagination} aria-label="Pagination">
       <button
-        className="page-btn"
+        type="button"
+        className={pageBtn}
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
+        aria-label="Previous page"
       >
-        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
+        <Icon name="chevronLeft" size={16} strokeWidth={2} aria-hidden />
       </button>
 
       {pages.map((p, i) =>
         p === '...' ? (
-          <span key={`ellipsis-${i}`} style={{ padding: '0 4px', color: 'var(--text-muted)', fontSize: 14 }}>…</span>
+          <span key={`ellipsis-${i}`} className="px-1 text-sm text-muted" aria-hidden>…</span>
         ) : (
           <button
             key={p}
-            className={`page-btn ${p === page ? 'active' : ''}`}
+            type="button"
+            className={p === page ? pageBtnActive : pageBtn}
             onClick={() => onPageChange(p)}
+            aria-label={`Page ${p}`}
+            aria-current={p === page ? 'page' : undefined}
           >
             {p}
           </button>
@@ -39,14 +45,14 @@ export default function Pagination({ page, totalPages, onPageChange }) {
       )}
 
       <button
-        className="page-btn"
+        type="button"
+        className={pageBtn}
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
+        aria-label="Next page"
       >
-        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        <Icon name="chevronRight" size={16} strokeWidth={2} aria-hidden />
       </button>
-    </div>
+    </nav>
   );
 }

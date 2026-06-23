@@ -1,0 +1,181 @@
+/* CampusFlow — design tokens + Tailwind @theme */
+
+:root {
+  /* Palette: cyan */
+  --cyan-50: #ecfeff;
+  --cyan-100: #cffafe;
+  --cyan-200: #a5f3fc;
+  --cyan-300: #67e8f9;
+  --cyan-400: #22d3ee;
+  --cyan-500: #06b6d4;
+  --cyan-600: #0891b2;
+  --cyan-700: #0e7490;
+  --cyan-800: #155e75;
+  --cyan-900: #164e63;
+
+  /* Palette: slate */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  /* Palette: purple */
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+
+  /* Palette: status */
+  --white: #ffffff;
+  --black: #000000;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+
+  /* Semantic: surfaces */
+  --bg-page: #f6f7fb;
+  --bg-surface: var(--white);
+  --bg-surface-2: #f1f3fa;
+
+  /* Semantic: text */
+  --text-primary: var(--slate-900);
+  --text-default: var(--slate-700);
+  --text-muted: var(--slate-500);
+  --text-inverse: var(--slate-900);
+
+  /* Semantic: accent & borders */
+  --accent: var(--purple-600);
+  --accent-strong: var(--purple-700);
+  --accent-deep: var(--purple-800);
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-soft: rgba(15, 23, 42, 0.12);
+
+  /* Gradients & overlays */
+  --gradient-accent: linear-gradient(135deg, #8b5cf6, #a855f7);
+  --gradient-active-item: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.18),
+    rgba(168, 85, 247, 0.08),
+    transparent
+  );
+  --overlay-ambient: radial-gradient(
+    ellipse at top left,
+    rgba(139, 92, 246, 0.08),
+    transparent 55%
+  );
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.08);
+  --shadow-md: 0 10px 28px rgba(2, 6, 23, 0.12);
+  --shadow-lg: 0 18px 52px rgba(2, 6, 23, 0.14);
+  --shadow-glow: 0 0 24px rgba(168, 85, 247, 0.18);
+
+  /* Motion */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+@theme inline {
+  --color-page: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-surface-2);
+  --color-primary: var(--text-primary);
+  --color-default: var(--text-default);
+  --color-muted: var(--text-muted);
+  --color-inverse: var(--text-inverse);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-deep: var(--accent-deep);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-soft: var(--border-soft);
+
+  --color-cyan-50: var(--cyan-50);
+  --color-cyan-100: var(--cyan-100);
+  --color-cyan-200: var(--cyan-200);
+  --color-cyan-300: var(--cyan-300);
+  --color-cyan-400: var(--cyan-400);
+  --color-cyan-500: var(--cyan-500);
+  --color-cyan-600: var(--cyan-600);
+  --color-cyan-700: var(--cyan-700);
+  --color-cyan-800: var(--cyan-800);
+  --color-cyan-900: var(--cyan-900);
+
+  --color-purple-50: var(--purple-50);
+  --color-purple-100: var(--purple-100);
+  --color-purple-200: var(--purple-200);
+  --color-purple-300: var(--purple-300);
+  --color-purple-400: var(--purple-400);
+  --color-purple-500: var(--purple-500);
+  --color-purple-600: var(--purple-600);
+  --color-purple-700: var(--purple-700);
+  --color-purple-800: var(--purple-800);
+  --color-purple-900: var(--purple-900);
+
+  --color-amber-400: var(--amber-400);
+  --color-amber-500: var(--amber-500);
+  --color-red-400: var(--red-400);
+  --color-red-500: var(--red-500);
+  --color-green-400: var(--green-400);
+  --color-green-500: var(--green-500);
+  --color-purple-400: var(--purple-400);
+
+  --font-sans: var(--font-sans);
+
+  --transition-duration-fast: var(--transition-fast);
+  --transition-duration-base: var(--transition-base);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-glow: var(--shadow-glow);
+
+  --spacing-sidebar: var(--sidebar-width);
+  --spacing-topbar: var(--topbar-height);
+
+  --background-image-accent: var(--gradient-accent);
+  --background-image-active-item: var(--gradient-active-item);
+  --background-image-ambient: var(--overlay-ambient);
+
+  --animate-spin: spin 0.65s linear infinite;
+  --animate-fade-in: fadeIn 180ms ease;
+  --animate-slide-up: slideUp 200ms ease;
+  --animate-slide-in-right: slideInRight 220ms ease;
+}

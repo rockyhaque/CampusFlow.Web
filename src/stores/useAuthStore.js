@@ -23,7 +23,7 @@ const useAuthStore = create(
         } catch (err) {
           const msg = err.response?.data?.message || 'Login failed. Please try again.';
           set({ isLoading: false, error: msg });
-          throw new Error(msg);
+          throw new Error(msg, { cause: err });
         }
       },
 

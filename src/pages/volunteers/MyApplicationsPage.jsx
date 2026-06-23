@@ -7,12 +7,20 @@ import { volunteersService } from '../../services/volunteers.service.js';
 import { feedbackService } from '../../services/feedback.service.js';
 import useToastStore from '../../stores/useToastStore.js';
 import Icon from '../../components/ui/Icon.jsx';
+import EmptyState from '../../components/ui/EmptyState.jsx';
 import RatingModal from '../../components/ui/RatingModal.jsx';
-
-function fmtDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+import { fmtDate } from '../../utils/format.js';
+import { pageContent, pageHeader, pageSubtitle, pageTitle } from '../../components/layout/layoutClasses.js';
+import {
+  btnGhostSm,
+  btnPrimarySm,
+  btnSuccessSm,
+  tableMeta,
+  tableRowActions,
+  tableSubtext,
+  tableWrap,
+  tdPrimary,
+} from '../../components/ui/componentClasses.js';
 
 const statusColor = { approved: 'green', rejected: 'red', pending: 'amber' };
 
@@ -32,27 +40,25 @@ export default function MyApplicationsPage() {
   return (
     <>
       <Topbar />
-      <div className="page-content">
-        <div className="page-header">
+      <div className={pageContent}>
+        <div className={pageHeader}>
           <div>
-            <div className="page-title">My Applications</div>
-            <div className="page-subtitle">Your volunteer event applications · {apps.length} total</div>
+            <div className={pageTitle}>My Applications</div>
+            <div className={pageSubtitle}>Your volunteer event applications · {apps.length} total</div>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => navigate('/events')}>
+          <button className={btnPrimarySm} onClick={() => navigate('/events')}>
             Browse Events
           </button>
         </div>
 
         {loading ? <PageSpinner /> : apps.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon" style={{ color: 'var(--text-muted)' }}>
-              <Icon name="clipboard" size={40} strokeWidth={1.4} />
-            </div>
-            <div className="empty-state-title">No applications yet</div>
-            <div className="empty-state-desc">Browse events and apply to volunteer roles.</div>
-          </div>
+          <EmptyState
+            icon="clipboard"
+            title="No applications yet"
+            description="Browse events and apply to volunteer roles."
+          />
         ) : (
-          <div className="table-wrap">
+          <div className={tableWrap}>
             <table>
               <thead>
                 <tr>
@@ -67,28 +73,28 @@ export default function MyApplicationsPage() {
                 {apps.map((app) => (
                   <tr key={app.id}>
                     <td>
-                      <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+                      <div className={tdPrimary}>
                         {app.event_title || 'Unknown Event'}
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                      <div className={tableSubtext}>
                         {app.event_date ? fmtDate(app.event_date) : ''}
                       </div>
                     </td>
-                    <td style={{ color: 'var(--text-default)', fontSize: 13 }}>
+                    <td className={tableMeta}>
                       {app.role_name || '—'}
                     </td>
                     <td>
                       <Badge label={app.status} color={statusColor[app.status] || 'slate'} />
                     </td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+                    <td className={tableMeta}>
                       {fmtDate(app.applied_at || app.created_at)}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <div className={tableRowActions}>
                         {/* Rate Organizer — approved volunteers can rate after the event completes */}
                         {app.status === 'approved' && app.event_status === 'completed' && app.organizer_id && (
                           <button
-                            className="btn btn-success btn-sm"
+                            className={btnSuccessSm}
                             onClick={() => setRating({
                               eventId: app.event_id,
                               eventTitle: app.event_title,
@@ -101,7 +107,7 @@ export default function MyApplicationsPage() {
                         )}
                         {app.event_id && (
                           <button
-                            className="btn btn-ghost btn-sm"
+                            className={btnGhostSm}
                             onClick={() => navigate(`/events/${app.event_id}`)}
                           >
                             View Event

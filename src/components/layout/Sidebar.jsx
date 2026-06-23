@@ -5,6 +5,17 @@ import useMobileNavStore from '../../stores/useMobileNavStore.js';
 import useNotifStore from '../../stores/useNotifStore.js';
 import AppLogo from '../ui/AppLogo.jsx';
 import Icon from '../ui/Icon.jsx';
+import {
+  sidebar,
+  sidebarItem,
+  sidebarItemBadge,
+  sidebarItemIcon,
+  sidebarLogo,
+  sidebarLogoutWrap,
+  sidebarNav,
+  sidebarSection,
+  sidebarSectionLabel,
+} from './layoutClasses.js';
 
 const navConfig = {
   ADMIN: [
@@ -133,29 +144,37 @@ export default function Sidebar() {
   }, [location.pathname, closeDrawer]);
 
   return (
-    <aside className={`sidebar${drawerOpen ? ' is-open' : ''}`}>
+    <aside className={sidebar(drawerOpen)}>
       {/* Logo */}
-      <div className="sidebar-logo">
+      <div className={sidebarLogo}>
         <AppLogo size="md" />
       </div>
 
       {/* Navigation */}
-      <nav className="sidebar-nav">
+      <nav className={sidebarNav}>
         {sections.map((sec) => (
-          <div key={sec.section} className="sidebar-section">
-            <div className="sidebar-section-label">{sec.section}</div>
+          <div key={sec.section} className={sidebarSection}>
+            <div className={sidebarSectionLabel}>{sec.section}</div>
             {sec.items.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.to === '/dashboard' || item.to === '/events' || item.to === '/users'}
-                className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
+                className={({ isActive }) => sidebarItem(isActive)}
                 onClick={handleNav}
               >
-                <span className="sidebar-item-icon"><Icon name={item.icon} size={17} /></span>
-                <span>{item.label}</span>
-                {item.notif && unreadCount > 0 && (
-                  <span className="sidebar-item-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                {({ isActive }) => (
+                  <>
+                    <span className={sidebarItemIcon(isActive)}>
+                      <Icon name={item.icon} size={17} />
+                    </span>
+                    <span>{item.label}</span>
+                    {item.notif && unreadCount > 0 && (
+                      <span className={sidebarItemBadge}>
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </>
                 )}
               </NavLink>
             ))}
@@ -164,9 +183,15 @@ export default function Sidebar() {
       </nav>
 
       {/* Logout pinned at bottom */}
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(15,23,42,0.06)', flexShrink: 0 }}>
-        <button className="sidebar-item" onClick={handleLogout} style={{ width: '100%', color: 'var(--red-400)' }}>
-          <span className="sidebar-item-icon" style={{ color: 'var(--red-400)' }}><Icon name="logout" size={17} /></span>
+      <div className={sidebarLogoutWrap}>
+        <button
+          type="button"
+          className={`${sidebarItem(false)} w-full text-red-400`}
+          onClick={handleLogout}
+        >
+          <span className={`${sidebarItemIcon(false)} text-red-400`}>
+            <Icon name="logout" size={17} />
+          </span>
           <span>Logout</span>
         </button>
       </div>

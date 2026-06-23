@@ -21,3 +21,16 @@ export const PAYMENT_METHOD_TYPES = [
   { value: 'bank_transfer', label: 'Bank Transfer', color: '#0891b2', icon: 'https://res.cloudinary.com/dnpun8jzt/image/upload/v1778574374/bank_transfer_lgoe9b.png' },
   { value: 'other',         label: 'Other',         color: '#64748b', icon: null },
 ];
+
+/** Tailwind badge background per payment type (matches PAYMENT_METHOD_TYPES colors). */
+export const PAYMENT_TYPE_BADGE_CLASS = {
+  bkash: 'bg-[#e2136e]',
+  nagad: 'bg-[#ec1c24]',
+  rocket: 'bg-[#8b3eb6]',
+  bank_transfer: 'bg-[#0891b2]',
+  other: 'bg-slate-500',
+};
+
+export function paymentTypeBadgeClass(type) {
+  return PAYMENT_TYPE_BADGE_CLASS[type] || PAYMENT_TYPE_BADGE_CLASS.other;
+}

@@ -1,0 +1,95 @@
+/* Base — reset & document defaults */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    @apply m-0 h-full w-full p-0;
+  }
+
+  body {
+    @apply antialiased;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-default);
+    background-color: var(--bg-page);
+    background-image: var(--overlay-ambient);
+    background-attachment: fixed;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply m-0 font-semibold tracking-tight;
+    color: var(--text-primary);
+  }
+
+  p {
+    @apply m-0;
+  }
+
+  a {
+    color: var(--accent);
+    @apply no-underline;
+    transition: color var(--transition-fast);
+  }
+
+  a:hover {
+    color: var(--cyan-300);
+  }
+
+  button {
+    font-family: inherit;
+    @apply cursor-pointer border-0 bg-transparent text-inherit;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: inherit;
+    @apply text-inherit;
+  }
+
+  ul,
+  ol {
+    @apply m-0 list-none p-0;
+  }
+
+  img,
+  svg {
+    @apply block max-w-full;
+  }
+
+  ::-webkit-scrollbar {
+    @apply h-2.5 w-2.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-slate-400/18;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400/32;
+  }
+}

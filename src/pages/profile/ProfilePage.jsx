@@ -1,5 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
 import Topbar from '../../components/layout/Topbar.jsx';
 import Avatar from '../../components/ui/Avatar.jsx';
 import Badge from '../../components/ui/Badge.jsx';
@@ -9,6 +8,22 @@ import { usersService } from '../../services/users.service.js';
 import { authService } from '../../services/auth.service.js';
 import useAuthStore from '../../stores/useAuthStore.js';
 import useToastStore from '../../stores/useToastStore.js';
+import { pageContent } from '../../components/layout/layoutClasses.js';
+import { btnDangerSm, btnGhostSm, btnPrimaryFull, btnPrimarySm, inputField, inputLabel, inputSelect, inputWrap, textareaField } from '../../components/ui/componentClasses.js';
+import {
+  profileShell, profileCard, profileCover, profileCoverPattern, profileCoverPatternBg, profileHero,
+  profilePhotoWrap, profilePhotoBtn, profileHeroMeta, profileHeroName, profileHeroSub,
+  profileHeroEmail, profileTabs, profileTab, profileBody, profileGrid, profileSection,
+  profileSectionHead, profileSectionTitle, profileEditLink, profileKv, profileKvRow,
+  profileK, profileV, profileMuted, profileSkillChips, profileSkillChipActive,
+  profileSkillChipEditable, profilePwCard,
+  profileUnsavedBanner, profileUnsavedBannerInner, profileUnsavedBannerText, profileUnsavedBannerActions,
+  profileBannerBtnSm, profileLeaveOverlay, profileLeaveModal, profileLeaveModalHead,
+  profileLeaveModalTitle, profileLeaveModalBody, profileLeaveModalActions,
+  profileHiddenFileInput, profileSkillCount, profileSkillRemoveBtn, profileSkillAddRow,
+  profileSkillAddInput, profileSkillAddBtn, profileSkillCancelBtn,
+  profilePwHeader, profilePwTitle, profilePwFormStack, profilePwSubmitWrap,
+} from './profileClasses.js';
 
 const isStaff = (role) => role === 'ADMIN';
 const isOrganizer = (role) => role === 'ORGANIZER';
@@ -34,8 +49,8 @@ export default function ProfilePage() {
   const [form, setForm] = useState({});
   const [pwForm, setPwForm] = useState({ oldPassword: '', newPassword: '', confirm: '' });
   const [pwLoading, setPwLoading] = useState(false);
-  const savedForm = useRef({});
-  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm.current);
+  const [savedForm, setSavedForm] = useState({});
+  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
 
   useEffect(() => {
     usersService.getMyProfile()
@@ -52,7 +67,7 @@ export default function ProfilePage() {
           skills: r.data.skills || [],
         };
         setForm(initial);
-        savedForm.current = initial;
+        setSavedForm(initial);
       })
       .catch(() => useToastStore.getState().error('Failed to load profile.'))
       .finally(() => setLoading(false));
@@ -97,7 +112,7 @@ export default function ProfilePage() {
       const res = await usersService.updateMyProfile(form);
       setProfile(res.data);
       await fetchMe();
-      savedForm.current = { ...form };
+      setSavedForm({ ...form });
       useToastStore.getState().success('Profile updated!');
       setEditSection(null);
     } catch (err) {
@@ -116,7 +131,6 @@ export default function ProfilePage() {
   }, [isDirty]);
 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const pendingNavRef = useRef(null);
 
   // Intercept sidebar / back-button navigation when dirty
   useEffect(() => {
@@ -163,7 +177,7 @@ export default function ProfilePage() {
   if (loading) return (
     <>
       <Topbar />
-      <div className="page-content"><PageSpinner /></div>
+      <div className={pageContent}><PageSpinner /></div>
     </>
   );
 
@@ -174,7 +188,7 @@ export default function ProfilePage() {
   const organizer = isOrganizer(role);
 
   const toggleEdit = (section) => setEditSection((s) => (s === section ? null : section));
-  const val = (v) => v || <span className="profile-muted">—</span>;
+  const val = (v) => v || <span className={profileMuted}>—</span>;
 
   return (
     <>
@@ -182,34 +196,24 @@ export default function ProfilePage() {
 
       {/* Unsaved changes banner */}
       {isDirty && (
-        <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 16, padding: '12px 20px',
-          background: 'var(--bg-card)',
-          border: '1px solid rgba(251,191,36,0.40)',
-          borderRadius: 12,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-          backdropFilter: 'blur(12px)',
-          whiteSpace: 'nowrap',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className={profileUnsavedBanner}>
+          <div className={profileUnsavedBannerInner}>
             <Icon name="warning" size={15} color="var(--amber-400)" />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber-400)' }}>
+            <span className={profileUnsavedBannerText}>
               You have unsaved changes
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className={profileUnsavedBannerActions}>
             <button
-              className="btn btn-ghost btn-sm"
-              style={{ fontSize: 12 }}
-              onClick={() => { setForm({ ...savedForm.current }); setEditSection(null); }}
+              type="button"
+              className={`${btnGhostSm} ${profileBannerBtnSm}`}
+              onClick={() => { setForm({ ...savedForm }); setEditSection(null); }}
             >
               Discard
             </button>
             <button
-              className="btn btn-primary btn-sm"
-              style={{ fontSize: 12 }}
+              type="button"
+              className={`${btnPrimarySm} ${profileBannerBtnSm}`}
               onClick={handleSaveProfile}
               disabled={saving}
             >
@@ -221,27 +225,22 @@ export default function ProfilePage() {
 
       {/* Leave confirmation modal */}
       {showLeaveModal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'var(--bg-card)', borderRadius: 16, padding: '28px 32px',
-            maxWidth: 400, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div className={profileLeaveOverlay}>
+          <div className={profileLeaveModal}>
+            <div className={profileLeaveModalHead}>
               <Icon name="warning" size={20} color="var(--amber-400)" />
-              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Unsaved changes</span>
+              <span className={profileLeaveModalTitle}>Unsaved changes</span>
             </div>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+            <p className={profileLeaveModalBody}>
               You have unsaved changes. If you leave now your changes will be lost.
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowLeaveModal(false)}>Stay</button>
+            <div className={profileLeaveModalActions}>
+              <button type="button" className={btnGhostSm} onClick={() => setShowLeaveModal(false)}>Stay</button>
               <button
-                className="btn btn-danger btn-sm"
+                type="button"
+                className={btnDangerSm}
                 onClick={() => {
-                  savedForm.current = { ...form };
+                  setSavedForm({ ...form });
                   setShowLeaveModal(false);
                   history.back();
                 }}
@@ -253,36 +252,35 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="page-content">
-        <div className="profile-shell">
+      <div className={pageContent}>
+        <div className={profileShell}>
 
-          <div className="profile-card">
+          <div className={profileCard}>
             {/* Cover banner */}
-            <div className="profile-cover" />
+            <div className={profileCover}>
+              <div className={`${profileCoverPattern} ${profileCoverPatternBg}`} aria-hidden="true" />
+            </div>
 
             {/* Hero */}
-            <div className="profile-hero">
-              <div className="profile-photo-wrap">
+            <div className={profileHero}>
+              <div className={profilePhotoWrap}>
                 <Avatar name={name} src={profile?.photo_url} size="xl" />
-                <label className="profile-photo-btn" title="Upload photo">
-                  <svg width="12" height="12" fill="none" stroke="white" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+                <label className={profilePhotoBtn} title="Upload photo">
+                  <Icon name="camera" size={12} strokeWidth={2.2} color="#fff" />
+                  <input type="file" accept="image/*" className={profileHiddenFileInput} onChange={handlePhotoUpload} />
                 </label>
               </div>
-              <div className="profile-hero__meta">
-                <div className="profile-hero__name">{name}</div>
-                <div className="profile-hero__sub">
-                  <span className="profile-hero__email">{email}</span>
+              <div className={profileHeroMeta}>
+                <div className={profileHeroName}>{name}</div>
+                <div className={profileHeroSub}>
+                  <span className={profileHeroEmail}>{email}</span>
                   <Badge label={role} />
                 </div>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="profile-tabs">
+            <div className={profileTabs}>
               {[
                 { key: 'general', label: 'General' },
                 { key: 'password', label: 'Password' },
@@ -290,7 +288,7 @@ export default function ProfilePage() {
                 <button
                   key={t.key}
                   type="button"
-                  className={`profile-tab${tab === t.key ? ' is-active' : ''}`}
+                  className={profileTab(tab === t.key)}
                   onClick={() => { setTab(t.key); setEditSection(null); }}
                 >
                   {t.label}
@@ -299,37 +297,37 @@ export default function ProfilePage() {
             </div>
 
             {/* Body */}
-            <div className="profile-body">
+            <div className={profileBody}>
               {tab === 'general' && (
                 <form onSubmit={handleSaveProfile}>
-                  <div className="profile-grid">
+                  <div className={profileGrid}>
 
                     {/* Contact info */}
-                    <div className="profile-section">
-                      <div className="profile-section__head">
-                        <div className="profile-section__title">Contact info</div>
-                        <button type="button" className="profile-edit-link" onClick={() => toggleEdit('contact')}>
+                    <div className={profileSection}>
+                      <div className={profileSectionHead}>
+                        <div className={profileSectionTitle}>Contact info</div>
+                        <button type="button" className={profileEditLink} onClick={() => toggleEdit('contact')}>
                           {editSection === 'contact' ? 'Done' : 'Edit'}
                         </button>
                       </div>
-                      <div className="profile-kv">
-                        <div className="profile-kv-row">
-                          <div className="profile-k">Display name</div>
-                          <div className="profile-v">
+                      <div className={profileKv}>
+                        <div className={profileKvRow}>
+                          <div className={profileK}>Display name</div>
+                          <div className={profileV}>
                             {editSection === 'contact'
-                              ? <input name="fullName" className="input-field" value={form.fullName} onChange={handleChange} />
+                              ? <input name="fullName" className={inputField} value={form.fullName} onChange={handleChange} />
                               : val(form.fullName)}
                           </div>
                         </div>
-                        <div className="profile-kv-row">
-                          <div className="profile-k">Email address</div>
-                          <div className="profile-v">{val(email)}</div>
+                        <div className={profileKvRow}>
+                          <div className={profileK}>Email address</div>
+                          <div className={profileV}>{val(email)}</div>
                         </div>
-                        <div className="profile-kv-row">
-                          <div className="profile-k">Phone number</div>
-                          <div className="profile-v">
+                        <div className={profileKvRow}>
+                          <div className={profileK}>Phone number</div>
+                          <div className={profileV}>
                             {editSection === 'contact'
-                              ? <input name="phone" className="input-field" placeholder="01XXXXXXXXX" value={form.phone} onChange={handleChange} />
+                              ? <input name="phone" className={inputField} placeholder="01XXXXXXXXX" value={form.phone} onChange={handleChange} />
                               : val(form.phone)}
                           </div>
                         </div>
@@ -338,33 +336,33 @@ export default function ProfilePage() {
 
                     {/* Personal info — hidden for ADMIN */}
                     {!staff && (
-                      <div className="profile-section">
-                        <div className="profile-section__head">
-                          <div className="profile-section__title">
+                      <div className={profileSection}>
+                        <div className={profileSectionHead}>
+                          <div className={profileSectionTitle}>
                             {organizer ? 'Organization info' : 'Academic info'}
                           </div>
-                          <button type="button" className="profile-edit-link" onClick={() => toggleEdit('personal')}>
+                          <button type="button" className={profileEditLink} onClick={() => toggleEdit('personal')}>
                             {editSection === 'personal' ? 'Done' : 'Edit'}
                           </button>
                         </div>
-                        <div className="profile-kv">
+                        <div className={profileKv}>
                           {!organizer && (
-                            <div className="profile-kv-row">
-                              <div className="profile-k">Student ID</div>
-                              <div className="profile-v">
+                            <div className={profileKvRow}>
+                              <div className={profileK}>Student ID</div>
+                              <div className={profileV}>
                                 {editSection === 'personal'
-                                  ? <input name="studentId" className="input-field" value={form.studentId} onChange={handleChange} />
+                                  ? <input name="studentId" className={inputField} value={form.studentId} onChange={handleChange} />
                                   : val(form.studentId)}
                               </div>
                             </div>
                           )}
-                          <div className="profile-kv-row">
-                            <div className="profile-k">Department</div>
-                            <div className="profile-v">
+                          <div className={profileKvRow}>
+                            <div className={profileK}>Department</div>
+                            <div className={profileV}>
                               {editSection === 'personal' ? (
                                 <select
                                   name="department"
-                                  className="input-field select-field"
+                                  className={inputSelect}
                                   value={form.department || ''}
                                   onChange={handleChange}
                                 >
@@ -383,19 +381,19 @@ export default function ProfilePage() {
                           </div>
                           {!organizer && (
                             <>
-                              <div className="profile-kv-row">
-                                <div className="profile-k">Batch</div>
-                                <div className="profile-v">
+                              <div className={profileKvRow}>
+                                <div className={profileK}>Batch</div>
+                                <div className={profileV}>
                                   {editSection === 'personal'
-                                    ? <input name="batch" type="number" className="input-field" value={form.batch} onChange={handleChange} />
+                                    ? <input name="batch" type="number" className={inputField} value={form.batch} onChange={handleChange} />
                                     : val(form.batch)}
                                 </div>
                               </div>
-                              <div className="profile-kv-row">
-                                <div className="profile-k">Section</div>
-                                <div className="profile-v">
+                              <div className={profileKvRow}>
+                                <div className={profileK}>Section</div>
+                                <div className={profileV}>
                                   {editSection === 'personal'
-                                    ? <input name="section" className="input-field" value={form.section} onChange={handleChange} />
+                                    ? <input name="section" className={inputField} value={form.section} onChange={handleChange} />
                                     : val(form.section)}
                                 </div>
                               </div>
@@ -406,44 +404,39 @@ export default function ProfilePage() {
                     )}
 
                     {/* About */}
-                    <div className={`profile-section${staff ? '' : ''}`}>
-                      <div className="profile-section__head">
-                        <div className="profile-section__title">About</div>
-                        <button type="button" className="profile-edit-link" onClick={() => toggleEdit('about')}>
+                    <div className={profileSection}>
+                      <div className={profileSectionHead}>
+                        <div className={profileSectionTitle}>About</div>
+                        <button type="button" className={profileEditLink} onClick={() => toggleEdit('about')}>
                           {editSection === 'about' ? 'Done' : 'Edit'}
                         </button>
                       </div>
                       {editSection === 'about'
-                        ? <textarea name="bio" className="textarea-field" rows={4} value={form.bio} onChange={handleChange} style={{ resize: 'vertical' }} />
-                        : <div className="profile-v" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{val(form.bio)}</div>}
+                        ? <textarea name="bio" className={textareaField} rows={4} value={form.bio} onChange={handleChange} />
+                        : <div className={`${profileV} whitespace-pre-wrap leading-relaxed`}>{val(form.bio)}</div>}
                     </div>
 
                     {/* Skills — volunteers only, free-form */}
                     {role === 'VOLUNTEER' && (
-                      <div className="profile-section">
-                        <div className="profile-section__head">
-                          <div className="profile-section__title">Skills</div>
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      <div className={profileSection}>
+                        <div className={profileSectionHead}>
+                          <div className={profileSectionTitle}>Skills</div>
+                          <span className={profileSkillCount}>
                             {(form.skills || []).length} added
                           </span>
                         </div>
-                        <div className="profile-skill-chips" style={{ alignItems: 'center' }}>
+                        <div className={profileSkillChips}>
                           {(form.skills || []).map((s) => (
                             <span
                               key={s}
-                              className="profile-skill-chip is-active"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                              className={profileSkillChipActive}
                             >
                               {s}
                               <button
                                 type="button"
                                 onClick={() => removeSkill(s)}
                                 aria-label={`Remove ${s}`}
-                                style={{
-                                  background: 'none', border: 'none', cursor: 'pointer',
-                                  color: 'inherit', opacity: 0.7, padding: 0,
-                                  display: 'inline-flex', alignItems: 'center',
-                                }}
+                                className={profileSkillRemoveBtn}
                               >
                                 <Icon name="x" size={11} />
                               </button>
@@ -451,7 +444,7 @@ export default function ProfilePage() {
                           ))}
 
                           {addingSkill ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            <span className={profileSkillAddRow}>
                               <input
                                 type="text"
                                 value={skillInput}
@@ -463,34 +456,22 @@ export default function ProfilePage() {
                                 autoFocus
                                 placeholder="e.g. Public speaking"
                                 maxLength={40}
-                                style={{
-                                  padding: '6px 12px', fontSize: 12,
-                                  border: '1px solid var(--accent)',
-                                  borderRadius: 999, outline: 'none',
-                                  minWidth: 160, background: 'white',
-                                  color: 'var(--text-primary)',
-                                }}
+                                className={profileSkillAddInput}
                               />
                               <button
                                 type="button" onClick={addSkill}
-                                className="btn btn-primary btn-sm"
-                                style={{ padding: '4px 12px', fontSize: 11 }}
+                                className={`${btnPrimarySm} ${profileSkillAddBtn}`}
                               >Add</button>
                               <button
                                 type="button" onClick={cancelAddSkill}
-                                className="btn btn-ghost btn-sm"
-                                style={{ padding: '4px 10px', fontSize: 11 }}
+                                className={`${btnGhostSm} ${profileSkillCancelBtn}`}
                               >Cancel</button>
                             </span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => setAddingSkill(true)}
-                              className="profile-skill-chip is-editable"
-                              style={{
-                                borderStyle: 'dashed', cursor: 'pointer',
-                                display: 'inline-flex', alignItems: 'center', gap: 4,
-                              }}
+                              className={profileSkillChipEditable}
                             >
                               <Icon name="plus" size={12} /> Add skill
                             </button>
@@ -506,27 +487,27 @@ export default function ProfilePage() {
               )}
 
               {tab === 'password' && (
-                <div className="profile-pw-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <div className={profilePwCard}>
+                  <div className={profilePwHeader}>
                     <Icon name="lock" size={16} color="var(--accent)" />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>Change password</span>
+                    <span className={profilePwTitle}>Change password</span>
                   </div>
                   <form onSubmit={handleChangePassword}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="oldPassword">Current password</label>
-                        <input id="oldPassword" type="password" className="input-field" value={pwForm.oldPassword} onChange={(e) => setPwForm((f) => ({ ...f, oldPassword: e.target.value }))} required />
+                    <div className={profilePwFormStack}>
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="oldPassword">Current password</label>
+                        <input id="oldPassword" type="password" className={inputField} value={pwForm.oldPassword} onChange={(e) => setPwForm((f) => ({ ...f, oldPassword: e.target.value }))} required />
                       </div>
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="newPassword">New password</label>
-                        <input id="newPassword" type="password" className="input-field" placeholder="Min. 6 characters" value={pwForm.newPassword} onChange={(e) => setPwForm((f) => ({ ...f, newPassword: e.target.value }))} required />
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="newPassword">New password</label>
+                        <input id="newPassword" type="password" className={inputField} placeholder="Min. 6 characters" value={pwForm.newPassword} onChange={(e) => setPwForm((f) => ({ ...f, newPassword: e.target.value }))} required />
                       </div>
-                      <div className="input-wrap">
-                        <label className="input-label" htmlFor="confirm">Confirm new password</label>
-                        <input id="confirm" type="password" className="input-field" value={pwForm.confirm} onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))} required />
+                      <div className={inputWrap}>
+                        <label className={inputLabel} htmlFor="confirm">Confirm new password</label>
+                        <input id="confirm" type="password" className={inputField} value={pwForm.confirm} onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))} required />
                       </div>
-                      <div style={{ marginTop: 6 }}>
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={pwLoading}>
+                      <div className={profilePwSubmitWrap}>
+                        <button type="submit" className={btnPrimaryFull} disabled={pwLoading}>
                           {pwLoading ? <Spinner size="sm" /> : 'Update password'}
                         </button>
                       </div>

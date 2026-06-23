@@ -1,3 +1,8 @@
+import {
+  badgeBase,
+  badgeColor,
+} from './componentClasses.js';
+
 const colorMap = {
   admin: 'purple',
   organizer: 'amber',
@@ -19,15 +24,10 @@ const colorMap = {
   online: 'cyan',
 };
 
-// Format a label for display: lowercase tokens like "ongoing" → "Ongoing",
-// snake_case "checked_in" → "Checked In", SCREAMING_SNAKE "ADMIN" → "Admin".
-// Codes that are already mixed-case or contain hyphens (e.g. "TKT-A4B7K9X3") are left alone.
 const formatLabel = (s) => {
   if (s == null) return s;
   const str = String(s);
-  // Leave well-formed codes alone (TKT-XXXX, etc.)
   if (/^[A-Z]+-[A-Z0-9]+$/.test(str)) return str;
-  // Already nicely cased? leave it.
   if (/[a-z][A-Z]/.test(str)) return str;
   return str
     .replace(/[_\s]+/g, ' ')
@@ -42,8 +42,12 @@ export default function Badge({ label, color, dot }) {
   const lookupKey = typeof label === 'string' ? label.toLowerCase() : label;
   const c = color || colorMap[lookupKey] || colorMap[label] || 'slate';
   return (
-    <span className={`badge badge-${c}`}>
-      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />}
+    <span className={`${badgeBase} ${badgeColor(c)}`}>
+      {dot && (
+        <span
+          className="inline-block h-1.5 w-1.5 rounded-full bg-current"
+        />
+      )}
       {formatLabel(label)}
     </span>
   );

@@ -4,6 +4,9 @@ import { authService } from '../../services/auth.service.js';
 import useToastStore from '../../stores/useToastStore.js';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
+import { authCard, authFooter, authForm, authLogo, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
+import Icon from '../../components/ui/Icon.jsx';
+import { btnPrimaryFullLg, inputField, inputIconRight, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
 
 const roles = [
   { value: 'VOLUNTEER', label: 'Volunteer', desc: 'Help at events, earn hours & certificates' },
@@ -51,35 +54,35 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-card">
-      <div className="auth-logo">
+    <div className={authCard}>
+      <div className={authLogo}>
         <AppLogo size="lg" />
       </div>
 
-      <h1 className="auth-title">Create account</h1>
-      <p className="auth-subtitle">Join the CampusFlow platform today.</p>
+      <h1 className={authTitle}>Create account</h1>
+      <p className={authSubtitle}>Join the CampusFlow platform today.</p>
 
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        <div className="input-wrap">
-          <label className="input-label" htmlFor="fullName">Full name</label>
+      <form className={authForm} onSubmit={handleSubmit} noValidate>
+        <div className={inputWrap}>
+          <label className={inputLabel} htmlFor="fullName">Full name</label>
           <input
             id="fullName"
             name="fullName"
             type="text"
-            className="input-field"
+            className={inputField}
             placeholder="Your full name"
             value={form.fullName}
             onChange={handleChange}
           />
         </div>
 
-        <div className="input-wrap">
-          <label className="input-label" htmlFor="email">Email address <span className="required-star">*</span></label>
+        <div className={inputWrap}>
+          <label className={inputLabel} htmlFor="email">Email address <span className="text-red-400">*</span></label>
           <input
             id="email"
             name="email"
             type="email"
-            className="input-field"
+            className={inputField}
             placeholder="you@example.com"
             value={form.email}
             onChange={handleChange}
@@ -87,42 +90,33 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="input-wrap">
-          <label className="input-label" htmlFor="password">Password <span className="required-star">*</span></label>
-          <div className="input-icon-wrap has-right-icon">
+        <div className={inputWrap}>
+          <label className={inputLabel} htmlFor="password">Password <span className="text-red-400">*</span></label>
+          <div className={inputIconWrapRight}>
             <input
               id="password"
               name="password"
               type={showPw ? 'text' : 'password'}
-              className="input-field"
+              className={inputField}
               placeholder="Minimum 6 characters"
               value={form.password}
               onChange={handleChange}
               autoComplete="new-password"
               required
             />
-            <span className="input-icon-right" onClick={() => setShowPw(!showPw)}>
-              {showPw ? (
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              )}
+            <span className={inputIconRight} onClick={() => setShowPw(!showPw)}>
+              <Icon name={showPw ? 'eyeOff' : 'eye'} size={16} strokeWidth={1.75} />
             </span>
           </div>
         </div>
 
-        <div className="input-wrap">
-          <label className="input-label">I am a… <span className="required-star">*</span></label>
-          <div className="role-list">
+        <div className={inputWrap}>
+          <label className={inputLabel}>I am a… <span className="text-red-400">*</span></label>
+          <div className="flex flex-col gap-2">
             {roles.map((r) => (
               <label
                 key={r.value}
-                className={`role-option${form.role === r.value ? ' selected' : ''}`}
+                className={`flex cursor-pointer items-start gap-3 rounded-[10px] border px-3.5 py-3 transition-[border-color,background] duration-[120ms] ${form.role === r.value ? 'border-purple-600 bg-violet-500/[0.06]' : 'border-slate-900/12 bg-transparent'}`}
               >
                 <input
                   type="radio"
@@ -130,23 +124,23 @@ export default function RegisterPage() {
                   value={r.value}
                   checked={form.role === r.value}
                   onChange={handleChange}
-                  className="role-radio"
+                  className="mt-0.5 accent-purple-600"
                 />
                 <div>
-                  <div className="role-title">{r.label}</div>
-                  <div className="role-desc">{r.desc}</div>
+                  <div className="text-sm font-medium text-slate-900">{r.label}</div>
+                  <div className="mt-0.5 text-xs text-slate-500">{r.desc}</div>
                 </div>
               </label>
             ))}
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={loading}>
+        <button type="submit" className={btnPrimaryFullLg} disabled={loading}>
           {loading ? <Spinner size="sm" /> : 'Create account'}
         </button>
       </form>
 
-      <div className="auth-footer">
+      <div className={authFooter}>
         Already have an account?{' '}
         <Link to="/login">Sign in</Link>
       </div>
