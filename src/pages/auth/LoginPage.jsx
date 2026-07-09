@@ -6,7 +6,7 @@ import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
 import { authCard, authFooter, authForm, authLogo, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
 import Icon from '../../components/ui/Icon.jsx';
-import { btnPrimaryFullLg, btnSecondarySm, inputField, inputIcon, inputIconRight, inputIconWrap, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
+import { btnPrimaryFullLg, btnSecondarySm, inputFieldWithIcon, inputFieldWithBothIcons, inputIcon, inputIconRight, inputIconWrap, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -61,7 +61,7 @@ export default function LoginPage() {
               id="email"
               name="email"
               type="email"
-              className={inputField}
+              className={inputFieldWithIcon}
               placeholder="you@example.com"
               value={form.email}
               onChange={handleChange}
@@ -81,7 +81,7 @@ export default function LoginPage() {
               id="password"
               name="password"
               type={showPw ? 'text' : 'password'}
-              className={inputField}
+              className={inputFieldWithBothIcons}
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}

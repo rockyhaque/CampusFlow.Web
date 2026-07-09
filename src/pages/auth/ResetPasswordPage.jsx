@@ -6,7 +6,7 @@ import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
 import Icon from '../../components/ui/Icon.jsx';
 import { authCard, authFooter, authForm, authLogo, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
-import { btnPrimaryFullLg, inputField, inputIcon, inputIconRight, inputIconWrap, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
+import { btnPrimaryFullLg, inputFieldWithIcon, inputFieldWithBothIcons, inputIcon, inputIconRight, inputIconWrap, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
 
 export default function ResetPasswordPage() {
   const [params] = useSearchParams();
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
             <input
               id="password"
               type={showPw ? 'text' : 'password'}
-              className={inputField}
+              className={inputFieldWithBothIcons}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -117,7 +117,7 @@ export default function ResetPasswordPage() {
             <input
               id="confirm"
               type={showPw ? 'text' : 'password'}
-              className={inputField}
+              className={inputFieldWithIcon}
               placeholder="••••••••"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}

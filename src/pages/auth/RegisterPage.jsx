@@ -6,7 +6,7 @@ import { Spinner } from '../../components/ui/Spinner.jsx';
 import AppLogo from '../../components/ui/AppLogo.jsx';
 import { authCard, authFooter, authForm, authLogo, authSubtitle, authTitle } from '../../components/layout/layoutClasses.js';
 import Icon from '../../components/ui/Icon.jsx';
-import { btnPrimaryFullLg, inputField, inputIconRight, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
+import { btnPrimaryFullLg, inputField, inputFieldWithRightIcon, inputIconRight, inputIconWrapRight, inputLabel, inputWrap } from '../../components/ui/componentClasses.js';
 
 const roles = [
   { value: 'VOLUNTEER', label: 'Volunteer', desc: 'Help at events, earn hours & certificates' },
@@ -97,7 +97,7 @@ export default function RegisterPage() {
               id="password"
               name="password"
               type={showPw ? 'text' : 'password'}
-              className={inputField}
+              className={inputFieldWithRightIcon}
               placeholder="Minimum 6 characters"
               value={form.password}
               onChange={handleChange}

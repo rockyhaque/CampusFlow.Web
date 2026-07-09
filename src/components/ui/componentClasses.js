@@ -62,6 +62,8 @@ export const inputFieldWithIcon = `${inputField} pl-10`;
 
 export const inputFieldWithRightIcon = `${inputField} pr-10`;
 
+export const inputFieldWithBothIcons = `${inputField} pl-10 pr-10`;
+
 export const textareaField =
   'textarea-field box-border min-h-[100px] w-full resize-y rounded-md border border-border-soft bg-slate-50/80 px-3.5 py-3 font-sans text-sm text-primary outline-none transition-[border-color,box-shadow] duration-[120ms] placeholder:text-muted focus:border-accent focus:bg-white focus:shadow-[0_0_0_3px_rgba(139,92,246,0.10)]';
 
